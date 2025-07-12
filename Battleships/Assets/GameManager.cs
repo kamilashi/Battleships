@@ -2,7 +2,12 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
 
+public static class EventManager
+{
+    public static UnityEvent onShipAdded = new UnityEvent();
+}
 public enum GamePhase
 {
     Build,
@@ -10,7 +15,6 @@ public enum GamePhase
 }
 public class GameManager : MonoBehaviour
 {
-
     [Header("Manual Setup")]
     public BattleFieldView battlefieldView;
     public BattleField battleField;
@@ -51,6 +55,7 @@ public class GameManager : MonoBehaviour
         {
             battleField.PlaceShip(x, y, shipData);
             battlefieldView.SpawnShipObject(x, y, shipData);
+            EventManager.onShipAdded?.Invoke();
         }
     }
 

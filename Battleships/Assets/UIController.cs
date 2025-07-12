@@ -10,9 +10,13 @@ public class UIController : MonoBehaviour
     public GameObject shipButtonPrefab;
     public RectTransform shipButtonParent;
 
+    [Header("Setup")]
+    public List<UIShipButton> shipButtons;
+
     void Start()
     {
         Initialize();
+        EventManager.onShipAdded.AddListener(UpdateShipButtons);
     }
 
     // Update is called once per frame
@@ -28,11 +32,23 @@ public class UIController : MonoBehaviour
 
     public void Initialize()
     {
+        List<ShipData> shipDatas = gameManager.GetShipDataList();
+
         for( int i = 0; i < (int) ShipType.Count; i++)
         {
             GameObject cellGameObject = GameObject.Instantiate(shipButtonPrefab, shipButtonParent);
             UIShipButton buttonObj = cellGameObject.GetComponent<UIShipButton>();
-            buttonObj.Initialize(this, (ShipType) i);
+            shipButtons.Add(buttonObj);
+            buttonObj.Initialize(this, shipDatas[i]);
+        }
+    }
+
+    public void UpdateShipButtons()
+    {
+        for (int i = 0; i < (int)ShipType.Count; i++)
+        {
+            UIShipButton buttonObj = shipButtons[i];
+            buttonObj.UpdateShipCount(gameManager.shipManager.availableShips[i]);
         }
     }
 }

@@ -74,8 +74,8 @@ public class ShipManager : MonoBehaviour
     public int totalShipCount = 0;
     public List<ShipData> shipDatas;
 
-    List<int> availableShips = new List<int>();
-    List<int> currentShips = new List<int>();
+    public List<int> availableShips = new List<int>();
+    public List<int> currentShips = new List<int>();
 
     void Awake()
     {
