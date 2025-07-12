@@ -482,6 +482,7 @@ GameObject:
   - component: {fileID: 848502399}
   - component: {fileID: 848502400}
   - component: {fileID: 848502401}
+  - component: {fileID: 848502402}
   m_Layer: 0
   m_Name: Functional
   m_TagString: Untagged
@@ -505,7 +506,6 @@ MonoBehaviour:
   vertiCellsCount: 10
   cellSize: 1
   originTransformBottomLeft: {fileID: 848502397}
-  mainCamera: {fileID: 963194227}
   placedType: 0
   isInitialized: 0
 --- !u!4 &848502397
@@ -544,6 +544,7 @@ MonoBehaviour:
   cellPrefab: {fileID: 2687068710542369478, guid: 3e83cc11dc9c41c4a88b58930ffb0036,
     type: 3}
   cellObjects: []
+  shipObjects: []
   hoveredObject: {fileID: 0}
   isDebugRenderEnabled: 1
 --- !u!114 &848502399
@@ -592,6 +593,8 @@ MonoBehaviour:
     quadrupleUnitPrefab: {fileID: 5544024841142165647, guid: 9f81563b161e8a749b49f7961bb10b5d,
       type: 3}
   totalShipCount: 0
+  availableShipCounts: 
+  currentShipCounts: 
 --- !u!114 &848502401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -609,6 +612,19 @@ MonoBehaviour:
   shipManager: {fileID: 848502400}
   currentPhase: 0
   selectedShipType: 0
+  shipOrientation: 0
+--- !u!114 &848502402
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 848502395}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d89c24ce922efbe4b8376b9199a828f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &963194225
 GameObject:
   m_ObjectHideFlags: 0
@@ -1639,8 +1655,8 @@ CanvasGroup:
   m_GameObject: {fileID: 2124427104595185866}
   m_Enabled: 1
   m_Alpha: 1
-  m_Interactable: 0
-  m_BlocksRaycasts: 0
+  m_Interactable: 1
+  m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
 --- !u!33 &3988536661738689306
 MeshFilter:
@@ -2115,6 +2131,7 @@ MonoBehaviour:
   shipButtonPrefab: {fileID: 5638808275777312056, guid: fc9e3aeaa72b634439562551a34b2eda,
     type: 3}
   shipButtonParent: {fileID: 457435075}
+  shipButtons: []
 --- !u!114 &6672901819843417056
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2414,10 +2431,10 @@ RectTransform:
   - {fileID: 5130059732858690703}
   m_Father: {fileID: 5206785838707995194}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0.5, y: 0}
-  m_AnchorMax: {x: 0.5, y: 1}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 2000, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!23 &8736929172825758146
 MeshRenderer:

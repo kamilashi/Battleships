@@ -24,6 +24,7 @@ public class GameManager : MonoBehaviour
     public GamePhase currentPhase;
 
     public ShipType selectedShipType;
+    public Orientation shipOrientation;
 
     void Awake()
     {
@@ -44,18 +45,43 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        ShipData shipData = shipManager.GetShipData(type);
-        if (!battleField.CanPlaceShip(x, y, shipData))
+        StaticShipData shipData = shipManager.GetShipData(type);
+        if (!battleField.CanPlaceShip(x, y, shipData, shipOrientation))
         {
             Debug.Log("Cannot place ship here.");
             return;
         }
 
-        if (shipManager.CreateShip(type))
+        RuntimeShipData shipInstanceData = shipManager.CreateShip(type, x, y, shipOrientation);
+
+        if (shipInstanceData != null)
         {
-            battleField.PlaceShip(x, y, shipData);
-            battlefieldView.SpawnShipObject(x, y, shipData);
+            battleField.PlaceShip(x, y, shipInstanceData, shipData, shipOrientation);
+            int shipObjectId = battlefieldView.SpawnShipObject(x, y, shipData, shipInstanceData, shipOrientation);
+            Debug.Assert(shipObjectId == shipInstanceData.instanceId);
             EventManager.onShipAdded?.Invoke();
+        }
+    }
+    private void TryHitShip(int x, int y)
+    {
+        if (!battleField.field[x, y].IsFree())
+        {
+            int shipIndex = battleField.field[x, y].shipData.instanceId;
+            //RuntimeShipData shipData = battleField.field[x, y].shipData;
+            HitResult hitResult = shipManager.HitShip(shipIndex);
+
+            if(hitResult == HitResult.Killed)
+            {
+                battlefieldView.DestroyShipObject(shipIndex);
+
+                Debug.Log("Killed ship");
+            }
+            else
+            {
+                Debug.Log("Damaged ship");
+            }
+
+            battleField.ClearCell(x, y);
         }
     }
 
@@ -68,9 +94,9 @@ public class GameManager : MonoBehaviour
                     TryPlaceShip(x, y, selectedShipType);
                     break;
                 }
-            case GamePhase.Combat:
+            case GamePhase.Combat: //#TODO: SPLIT!
                 {
-
+                    TryHitShip(x,y);
                     break;
                 }
         }
@@ -81,7 +107,7 @@ public class GameManager : MonoBehaviour
         selectedShipType = selectedType;
     }
 
-    public List<ShipData> GetShipDataList()
+    public List<StaticShipData> GetShipDataList()
     {
         return shipManager.shipDatas;
     }

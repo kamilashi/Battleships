@@ -32,7 +32,7 @@ public class UIController : MonoBehaviour
 
     public void Initialize()
     {
-        List<ShipData> shipDatas = gameManager.GetShipDataList();
+        List<StaticShipData> shipDatas = gameManager.GetShipDataList();
 
         for( int i = 0; i < (int) ShipType.Count; i++)
         {
@@ -48,7 +48,7 @@ public class UIController : MonoBehaviour
         for (int i = 0; i < (int)ShipType.Count; i++)
         {
             UIShipButton buttonObj = shipButtons[i];
-            buttonObj.UpdateShipCount(gameManager.shipManager.availableShips[i]);
+            buttonObj.UpdateShipCount(gameManager.shipManager.availableShipCounts[i]);
         }
     }
 }

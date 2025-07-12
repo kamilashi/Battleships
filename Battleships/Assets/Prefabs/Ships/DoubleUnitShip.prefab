@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 1687795613441953268}
   - component: {fileID: 3078340681408298869}
   - component: {fileID: 5289975671965692972}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -114,7 +114,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1078480826817458398}
-  m_Layer: 0
+  - component: {fileID: 8725777130049623003}
+  m_Layer: 2
   m_Name: DoubleUnitShip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -137,3 +138,18 @@ Transform:
   - {fileID: 4930539581835445043}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &8725777130049623003
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5818551484238772351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cce346125b5d2c47a169a3f270327f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shipData:
+    type: 0
+    health: 0

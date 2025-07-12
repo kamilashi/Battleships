@@ -6,20 +6,36 @@ using UnityEngine;
 public struct BattleCell
 {
     public Vector3 bottomLeftOrigin;
-    public ShipType shipOwnerType;
-
+    public RuntimeShipData shipData;
     public void Initialize(Vector3 origin)
     {
         bottomLeftOrigin.x = origin.x;
         bottomLeftOrigin.y = origin.y;
         bottomLeftOrigin.z = origin.z;
 
-        shipOwnerType = ShipType.Count;
+        shipData = null;
+
+        Reset();
     }
 
     public bool IsFree()
     {
-        return shipOwnerType == ShipType.Count;
+        return shipData == null;
+    }
+
+    /*
+    public void ConnectShip(int id)
+    {
+        shipInstanceIndex = id;
+    }*/
+
+    public void ConnectShip(RuntimeShipData shipData)
+    {
+        this.shipData = shipData;
+    }
+    public void Reset()
+    {
+        shipData = null;
     }
 }
 
@@ -31,7 +47,6 @@ public class BattleField : MonoBehaviour
     public float cellSize = 1.0f;
 
     public Transform originTransformBottomLeft;
-    public Camera mainCamera;
 
     [Header("Debug")]
 
@@ -77,11 +92,6 @@ public class BattleField : MonoBehaviour
         return x >= 0 && y >= 0 && x < horizCellsCount && y < vertiCellsCount;
     }
 
-    void ConnectShip(ref BattleCell cell, ShipType type)
-    {
-        cell.shipOwnerType = type;
-    }
-
     private bool IsPathFree(int x, int y, int length, Vector2Int direction, bool adjacentSpaceCheck)
     {
         int coordX;
@@ -111,10 +121,10 @@ public class BattleField : MonoBehaviour
         return true;
     }
 
-    public bool CanPlaceShip(int x, int y, ShipData shipData)
+    public bool CanPlaceShip(int x, int y, StaticShipData shipData, Orientation shipOrientation)
     {
         bool areCellsFree = true;
-        Vector2Int orientation = shipData.GetOrientation();
+        Vector2Int orientation = StaticShipData.GetOrientation(shipOrientation);
         Vector2Int cellCoords = new Vector2Int(x, y);
         int shipSize = shipData.Size();
 
@@ -150,9 +160,9 @@ public class BattleField : MonoBehaviour
         return areCellsFree;
     }
 
-    public void PlaceShip(int x, int y, ShipData shipData)
+    public void PlaceShip(int x, int y, RuntimeShipData runtimeShipData, StaticShipData shipData, Orientation shipOrientation)
     {
-        Vector2Int orientation = shipData.GetOrientation();
+        Vector2Int orientation = StaticShipData.GetOrientation(shipOrientation);
         Vector2Int cellCoords = new Vector2Int(x, y);
 
         for (int i = 0; i < shipData.Size(); i++)
@@ -161,7 +171,28 @@ public class BattleField : MonoBehaviour
             cellCoords.y = y + i * orientation.y;
 
             ref BattleCell cell = ref field[cellCoords.x, cellCoords.y];
-            ConnectShip(ref cell, shipData.shipType);
+            cell.ConnectShip(runtimeShipData);
         }
+    }
+
+/*
+    public void RemoveShip(int x, int y, StaticShipData shipData, Orientation shipOrientation)
+    {
+        Vector2Int orientation = StaticShipData.GetOrientation(shipOrientation);
+        Vector2Int cellCoords = new Vector2Int(x, y);
+
+        for (int i = 0; i < shipData.Size(); i++)
+        {
+            cellCoords.x = x + i * orientation.x;
+            cellCoords.y = y + i * orientation.y;
+
+            ref BattleCell cell = ref field[cellCoords.x, cellCoords.y];
+            cell.Reset();
+        }
+    }*/
+    public void ClearCell(int x, int y)
+    {
+        ref BattleCell cell = ref field[x, y];
+        cell.Reset();
     }
 }

@@ -16,17 +16,7 @@ public class UIShipButton : MonoBehaviour
     public ShipType shipType;
     public UIController uIController;
 
-/*
-    public void Initialize(UIController uIController, ShipType shipType)
-    {
-        this.uIController = uIController;
-        this.shipType = shipType;
-        buttonNameText.text = shipType.ToString();
-
-        button.onClick.AddListener(OnButtonClick);
-    }*/
-
-    public void Initialize(UIController uIController, ShipData shipData)
+    public void Initialize(UIController uIController, StaticShipData shipData)
     {
         this.uIController = uIController;
         this.shipType = shipData.shipType;

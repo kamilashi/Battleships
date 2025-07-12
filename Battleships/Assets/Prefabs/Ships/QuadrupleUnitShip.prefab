@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 8627845026398755064}
   - component: {fileID: 7040021528816996176}
   - component: {fileID: 8182484663247493411}
-  m_Layer: 0
+  m_Layer: 2
   m_Name: model
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -114,7 +114,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3308380910514210486}
-  m_Layer: 0
+  - component: {fileID: 5105432197765072383}
+  m_Layer: 2
   m_Name: QuadrupleUnitShip
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -137,3 +138,18 @@ Transform:
   - {fileID: 569194884456078919}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &5105432197765072383
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 5544024841142165647}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 5cce346125b5d2c47a169a3f270327f0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  shipData:
+    type: 0
+    health: 0

@@ -17,6 +17,7 @@ public class BattleFieldView : MonoBehaviour
 
     [Header("DebugView")]
     public List<CellObject> cellObjects;
+    public List<ShipObject> shipObjects;
     public CellObject hoveredObject;
     public bool isDebugRenderEnabled = false;
 
@@ -59,16 +60,38 @@ public class BattleFieldView : MonoBehaviour
         gameManager.OnCellSelected(x,y);
     }
 
-    public void SpawnShipObject(int x, int y, ShipData shipData)
+    public int SpawnShipObject(int x, int y, StaticShipData shipData, RuntimeShipData runtimeShipData, Orientation orientation)
     {
         GameObject shipGameObject = GameObject.Instantiate(shipData.shipPrefab, shipSpawnParent);
         shipGameObject.transform.position = flowField.field[x, y].bottomLeftOrigin;
 
-        if(shipData.orientation == Orientation.Horizontal)
+        ShipObject shipObject = shipGameObject.GetComponent<ShipObject>();
+        shipObject.Initialize(runtimeShipData);
+
+        if (orientation == Orientation.Horizontal)
         {
             shipGameObject.transform.localRotation.eulerAngles.Set(0,90,0);
         }
+
+        int shipObjectIndex = shipObjects.Count;
+        shipObjects.Add(shipObject);
+
+        return shipObjectIndex;
     }
+
+    public void DestroyShipObject(int index)
+    {
+        GameObject shipGameObject = shipObjects[index].gameObject;
+        Destroy(shipGameObject);
+        //shipObjects.RemoveAt(index);
+    }
+
+/*
+    public void DestroyShipObject(ShipObject shipObject)
+    {
+        shipObjects.Remove(shipObject);
+        Destroy(shipObject);
+    }*/
 
 /*
 #if UNITY_EDITOR
