@@ -16,7 +16,7 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable
 
     [Header("Auto Setup")]
     public CellData cellData;
-    public FlowFieldView flowFieldView;
+    public BattleFieldView battleFieldView;
 
     private MaterialPropertyBlock mpb;
 
@@ -26,7 +26,7 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable
     }
     public void OnClicked()
     {
-        flowFieldView.OnCellObjectSelected(cellData.index.x, cellData.index.y);
+        battleFieldView.OnCellObjectSelected(cellData.index.x, cellData.index.y);
     }
 
     public void OnStartHover()

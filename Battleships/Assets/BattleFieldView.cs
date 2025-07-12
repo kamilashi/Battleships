@@ -3,10 +3,14 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 
-public class FlowFieldView : MonoBehaviour
+public class BattleFieldView : MonoBehaviour
 {
     [Header("Manual Setup")]
-    public FlowField flowField;
+    public BattleField flowField;
+    public GameManager gameManager;
+
+    public Transform cellSpawnParent;
+    public Transform shipSpawnParent;
 
     [Header("Visualization")]
     public GameObject cellPrefab;
@@ -35,13 +39,13 @@ public class FlowFieldView : MonoBehaviour
         {
             for (int j = 0; j < flowField.vertiCellsCount; j++)
             {
-                GameObject cellGameObject = GameObject.Instantiate(cellPrefab, this.transform);
+                GameObject cellGameObject = GameObject.Instantiate(cellPrefab, cellSpawnParent);
 
                 CellObject newCellObject = cellGameObject.GetComponent<CellObject>();
                 newCellObject.cellData.index.x = i;
                 newCellObject.cellData.index.y = j;
 
-                newCellObject.flowFieldView = this;
+                newCellObject.battleFieldView = this;
 
                 cellGameObject.transform.position = flowField.field[i, j].bottomLeftOrigin;
 
@@ -50,12 +54,23 @@ public class FlowFieldView : MonoBehaviour
         }
     }
 
-    public void OnCellObjectSelected(int x, int y)
+   public void OnCellObjectSelected(int x, int y)
     {
-        flowField.OnCellSelected(x,y);
+        gameManager.OnCellSelected(x,y);
     }
 
+    public void SpawnShipObject(int x, int y, ShipData shipData)
+    {
+        GameObject shipGameObject = GameObject.Instantiate(shipData.shipPrefab, shipSpawnParent);
+        shipGameObject.transform.position = flowField.field[x, y].bottomLeftOrigin;
 
+        if(shipData.orientation == Orientation.Horizontal)
+        {
+            shipGameObject.transform.localRotation.eulerAngles.Set(0,90,0);
+        }
+    }
+
+/*
 #if UNITY_EDITOR
     void OnDrawGizmos()
     {
@@ -102,5 +117,5 @@ public class FlowFieldView : MonoBehaviour
             }
         }
     }
-#endif
+#endif*/
 }

@@ -116,6 +116,10 @@ namespace Library
             end.z += size;
             Debug.DrawLine(start, end);
         }
+        public static Vector2Int GetRightCWVector(Vector2Int direction)
+        {
+            return new Vector2Int(direction.y, -direction.x);
+        }
     }
 
     public static class TextReadWriter
