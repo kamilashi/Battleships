@@ -75,4 +75,9 @@ public class GameManager : MonoBehaviour
     {
         selectedShipType = selectedType;
     }
+
+    public List<ShipData> GetShipDataList()
+    {
+        return shipManager.shipDatas;
+    }
 }
