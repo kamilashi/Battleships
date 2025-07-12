@@ -165,7 +165,7 @@ public class ShipManager : MonoBehaviour
 
         if(availableShipCounts[index] < 1)
         {
-            Debug.LogError("No available ships of type " + type.ToString());
+            Debug.Log("No available ships of type " + type.ToString());
             return null;
         }
 

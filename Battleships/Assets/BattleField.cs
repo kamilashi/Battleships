@@ -141,14 +141,14 @@ public class BattleField : MonoBehaviour
         Vector2Int localRight = Helpers.GetRightCWVector(orientation);
         cellCoords += localRight;
 
-        if(!areCellsFree || !IsPathFree(cellCoords.x, cellCoords.y, shipSize + 1, orientation, true))
+        if(!areCellsFree || !IsPathFree(cellCoords.x, cellCoords.y, shipSize + 2, orientation, true))
         {
             return false;
         }
 
         cellCoords -= 2 * localRight;
 
-        if (!areCellsFree || !IsPathFree(cellCoords.x, cellCoords.y, shipSize + 1, orientation, true))
+        if (!areCellsFree || !IsPathFree(cellCoords.x, cellCoords.y, shipSize + 2, orientation, true))
         {
             return false;
         }
@@ -160,12 +160,12 @@ public class BattleField : MonoBehaviour
         return areCellsFree;
     }
 
-    public void PlaceShip(int x, int y, RuntimeShipData runtimeShipData, StaticShipData shipData, Orientation shipOrientation)
+    public void PlaceShip(int x, int y, RuntimeShipData runtimeShipData, StaticShipData staticShipData, Orientation shipOrientation)
     {
         Vector2Int orientation = StaticShipData.GetOrientation(shipOrientation);
         Vector2Int cellCoords = new Vector2Int(x, y);
 
-        for (int i = 0; i < shipData.Size(); i++)
+        for (int i = 0; i < staticShipData.Size(); i++)
         {
             cellCoords.x = x + i * orientation.x;
             cellCoords.y = y + i * orientation.y;
@@ -175,21 +175,6 @@ public class BattleField : MonoBehaviour
         }
     }
 
-/*
-    public void RemoveShip(int x, int y, StaticShipData shipData, Orientation shipOrientation)
-    {
-        Vector2Int orientation = StaticShipData.GetOrientation(shipOrientation);
-        Vector2Int cellCoords = new Vector2Int(x, y);
-
-        for (int i = 0; i < shipData.Size(); i++)
-        {
-            cellCoords.x = x + i * orientation.x;
-            cellCoords.y = y + i * orientation.y;
-
-            ref BattleCell cell = ref field[cellCoords.x, cellCoords.y];
-            cell.Reset();
-        }
-    }*/
     public void ClearCell(int x, int y)
     {
         ref BattleCell cell = ref field[x, y];
