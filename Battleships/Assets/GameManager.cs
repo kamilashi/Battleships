@@ -17,16 +17,19 @@ public enum GamePhase
 public class GameState
 {
     public BattleField battleField;
+    public ShipManager shipManager;
 }
 
 public class GameManager : MonoBehaviour
 {
-    [Header("BattleField Setup")]
+    [Header("Battlefield Setup")]
     public BattleFieldSetup battlefieldSetup;
+
+    [Header("Ship Manager Setup")]
+    public ShipManagerSetupData shipManagerSetupData;
 
     [Header("Manual Setup")]
     public BattleFieldView battlefieldView;
-    public ShipManager shipManager;
 
     [Header("Debug View")]
     public GamePhase currentPhase;
@@ -41,8 +44,8 @@ public class GameManager : MonoBehaviour
         currentPhase = GamePhase.Build;
         gameState = new GameState();
 
-        BattleField battleField = new BattleField(battlefieldSetup);
-        gameState.battleField = battleField;
+        gameState.battleField = new BattleField(battlefieldSetup);
+        gameState.shipManager = new ShipManager(shipManagerSetupData);
 
         battlefieldView.Initialize();
     }
@@ -55,14 +58,14 @@ public class GameManager : MonoBehaviour
             return;
         }
 
-        StaticShipData shipData = shipManager.GetShipData(type);
+        StaticShipData shipData = gameState.shipManager.GetShipData(type);
         if (!gameState.battleField.CanPlaceShip(x, y, shipData, shipOrientation))
         {
             Debug.Log("Cannot place ship here.");
             return;
         }
 
-        RuntimeShipData shipInstanceData = shipManager.CreateShip(type, x, y, shipOrientation);
+        RuntimeShipData shipInstanceData = gameState.shipManager.CreateShip(type, x, y, shipOrientation);
 
         if (shipInstanceData != null)
         {
@@ -77,7 +80,7 @@ public class GameManager : MonoBehaviour
         if (!gameState.battleField.field[x, y].IsFree())
         {
             int shipIndex = gameState.battleField.field[x, y].shipData.instanceId;
-            HitResult hitResult = shipManager.HitShip(shipIndex);
+            HitResult hitResult = gameState.shipManager.HitShip(shipIndex);
 
             if(hitResult == HitResult.Killed)
             {
@@ -118,6 +121,6 @@ public class GameManager : MonoBehaviour
 
     public List<StaticShipData> GetShipDataList()
     {
-        return shipManager.shipDatas;
+        return gameState.shipManager.shipDatas;
     }
 }

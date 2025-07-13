@@ -32,19 +32,6 @@ public class RuntimeShipData
     public ShipType type;
     public int health;
     public int instanceId;
-    private Vector2Int originCoords; // might be obsolete
-    private Orientation orientation; // might be obsolete
-
-/*
-    public void Initialize(int maxHealth, ShipType type, int x, int y, Orientation orientation)
-    {
-        health = maxHealth; 
-        this.type = type;
-
-        originCoords.x = x; 
-        originCoords.y = y; 
-        this.orientation = orientation;
-    }*/
 
     public void Initialize(int maxHealth, ShipType type, int id)
     {
@@ -90,15 +77,15 @@ public struct StaticShipData
     {
         return (int)shipType + 1;
     }
-    static public Vector2Int GetOrientation(Orientation orientation)
-    {
+    static public Vector2Int GetOrientation(Orientation orientation) // #TODO: move out of here
+    { 
         return orientation == Orientation.Vertical ? new Vector2Int(0,1) : new Vector2Int(1, 0);
     }
 }
 
 
 [Serializable]
-public struct ShipSetupData // #TODO: move to a scriptable object
+public class ShipManagerSetupData // #TODO: move to a scriptable object
 {
     public GameObject singleUnitPrefab;
     public GameObject doubleUnitPrefab;
@@ -106,14 +93,9 @@ public struct ShipSetupData // #TODO: move to a scriptable object
     public GameObject quadrupleUnitPrefab;
 }
 
-public class ShipManager : MonoBehaviour
+public class ShipManager
 {
-    [Header("Manual Setup")]
-    public GameManager gameManager;
-
-    public ShipSetupData setupData;
-
-    [Header("Debug View")]
+    public ShipManagerSetupData setupData;
 
     public int totalShipCount = 0;
     public List<StaticShipData> shipDatas;
@@ -122,14 +104,10 @@ public class ShipManager : MonoBehaviour
     public List<int> currentShipCounts = new List<int>();
     public List<RuntimeShipData> shipInstances = new List<RuntimeShipData>();
 
-    void Awake()
+    public ShipManager(ShipManagerSetupData shipManagerSetupData)
     {
+        setupData = shipManagerSetupData;
         Initialize();
-    }
-
-    void Update()
-    {
-        
     }
 
     void Initialize()

@@ -477,10 +477,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 848502397}
+  - component: {fileID: 848502401}
   - component: {fileID: 848502398}
   - component: {fileID: 848502399}
-  - component: {fileID: 848502400}
-  - component: {fileID: 848502401}
   - component: {fileID: 848502402}
   m_Layer: 0
   m_Name: Functional
@@ -550,32 +549,6 @@ MonoBehaviour:
   hoveredObject: {fileID: 0}
   clickedObject: {fileID: 0}
   cellLayerIdx: 0
---- !u!114 &848502400
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 848502395}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 364a1e1e7a976b04bbc4b325b64b5bbc, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  gameManager: {fileID: 848502401}
-  setupData:
-    singleUnitPrefab: {fileID: 155178196347339139, guid: 553baea6c87e2c045a9c84b5e7001ab7,
-      type: 3}
-    doubleUnitPrefab: {fileID: 5818551484238772351, guid: 3a23a535703f3b6499e5ea1498e1e2a7,
-      type: 3}
-    tripleUnitPrefab: {fileID: 2575696555533621451, guid: bf0608f9ff2bc28408e76f426cdc3a47,
-      type: 3}
-    quadrupleUnitPrefab: {fileID: 5544024841142165647, guid: 9f81563b161e8a749b49f7961bb10b5d,
-      type: 3}
-  totalShipCount: 0
-  availableShipCounts: 
-  currentShipCounts: 
-  shipInstances: []
 --- !u!114 &848502401
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -593,8 +566,16 @@ MonoBehaviour:
     vertiCellsCount: 10
     cellSize: 1
     originTransformBottomLeft: {fileID: 1294106682}
+  shipManagerSetupData:
+    singleUnitPrefab: {fileID: 155178196347339139, guid: 553baea6c87e2c045a9c84b5e7001ab7,
+      type: 3}
+    doubleUnitPrefab: {fileID: 5818551484238772351, guid: 3a23a535703f3b6499e5ea1498e1e2a7,
+      type: 3}
+    tripleUnitPrefab: {fileID: 2575696555533621451, guid: bf0608f9ff2bc28408e76f426cdc3a47,
+      type: 3}
+    quadrupleUnitPrefab: {fileID: 5544024841142165647, guid: 9f81563b161e8a749b49f7961bb10b5d,
+      type: 3}
   battlefieldView: {fileID: 848502398}
-  shipManager: {fileID: 848502400}
   currentPhase: 0
   selectedShipType: 0
   shipOrientation: 0

@@ -48,7 +48,7 @@ public class UIController : MonoBehaviour
         for (int i = 0; i < (int)ShipType.Count; i++)
         {
             UIShipButton buttonObj = shipButtons[i];
-            buttonObj.UpdateShipCount(gameManager.shipManager.availableShipCounts[i]);
+            buttonObj.UpdateShipCount(gameManager.gameState.shipManager.availableShipCounts[i]);
         }
     }
 }
