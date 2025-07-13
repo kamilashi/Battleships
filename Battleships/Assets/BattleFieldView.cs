@@ -2,6 +2,20 @@ using System.Collections;
 using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
+using UnityEngine.Assertions;
+public struct CellHitData
+{
+    public BattleCell hitCell;
+    public HitResult hitResult;
+    public int shipInstanceIndex;
+
+    public CellHitData(HitResult result, BattleCell cell, int shipId)
+    {
+        hitResult = result;
+        hitCell = cell;
+        shipInstanceIndex = shipId;
+    }
+}
 
 public class BattleFieldView : MonoBehaviour
 {
@@ -13,12 +27,17 @@ public class BattleFieldView : MonoBehaviour
 
     [Header("Visualization")]
     public GameObject cellPrefab;
+    public GameObject damagedCellPrefab;
 
     [Header("DebugView")]
     public List<CellObject> cellObjects;
     public List<ShipObject> shipObjects;
     public CellObject hoveredObject;
     public bool isDebugRenderEnabled = false;
+
+    public List<CellHitData> hitQueue = new List<CellHitData>();
+
+    private float cellSize;
 
     public void Initialize()
     {
@@ -49,6 +68,16 @@ public class BattleFieldView : MonoBehaviour
         gameManager.OnCellSelected(x,y);
     }
 
+   public void VisualizeCellHit(CellHitData hitData)
+    {
+        ShipObject damagedShip =  shipObjects[hitData.shipInstanceIndex];
+
+        Vector3 position = hitData.hitCell.bottomLeftOrigin;
+        position.y += damagedShip.objectHeight;
+
+        damagedShip.SpawnChildWithGlobalPosition(damagedCellPrefab, position);
+    }
+
     public int SpawnShipObject(int x, int y, StaticShipData shipData, RuntimeShipData runtimeShipData, Orientation orientation)
     {
         GameObject shipGameObject = GameObject.Instantiate(shipData.shipPrefab, shipSpawnParent);
@@ -73,5 +102,31 @@ public class BattleFieldView : MonoBehaviour
         GameObject shipGameObject = shipObjects[index].gameObject;
         Destroy(shipGameObject);
         //shipObjects.RemoveAt(index);
+    }
+
+    public void AddHit(CellHitData hitData)
+    {
+        hitQueue.Add(hitData);
+    }
+
+    public void ProcessCellHits()
+    {
+        foreach (CellHitData hitData in hitQueue)
+        {
+            switch(hitData.hitResult)
+            {
+                case HitResult.Damaged:
+                    VisualizeCellHit(hitData);
+                    break;
+                case HitResult.Killed:
+                    Debug.Log("Here should be a visualizer for a killer hit!");
+                    break;
+                case HitResult.None:
+                    Debug.Log("Here should be a visualized miss!");
+                    break;
+            }
+        }
+
+        hitQueue.Clear();
     }
 }

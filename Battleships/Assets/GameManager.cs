@@ -95,6 +95,8 @@ public class GameManager : MonoBehaviour
             {
                 currentPhase = GamePhase.Combat;
             }
+
+            battlefieldView.ProcessCellHits();
         }
     }
 
@@ -126,10 +128,13 @@ public class GameManager : MonoBehaviour
     }
     private void TryHitShip(int x, int y, GameState targetgameState)
     {
+        HitResult hitResult = HitResult.None;
+        int shipIndex = -1;
+
         if (!targetgameState.battleField.field[x, y].IsFree())
         {
-            int shipIndex = targetgameState.battleField.field[x, y].shipData.instanceId;
-            HitResult hitResult = targetgameState.shipManager.HitShip(shipIndex);
+            shipIndex = targetgameState.battleField.field[x, y].shipData.instanceId;
+            hitResult = targetgameState.shipManager.HitShip(shipIndex);
 
             if(hitResult == HitResult.Killed)
             {
@@ -144,6 +149,13 @@ public class GameManager : MonoBehaviour
 
             targetgameState.battleField.ClearCell(x, y);
         }
+        else
+        {
+            Debug.Log("Missed!");
+        }
+
+        CellHitData cellHitData = new CellHitData(hitResult, targetgameState.battleField.field[x, y], shipIndex);
+        battlefieldView.AddHit(cellHitData);
     }
 
     public void ProcessTurn(GameState player1, GameState player2)
@@ -153,11 +165,14 @@ public class GameManager : MonoBehaviour
             ProcessCommand(command, player1, player2);
         }
 
+        player1.commands.Clear();
+
         foreach (PlayerCommand command in player2.commands)
         {
             ProcessCommand(command, player2, player1);
         }
 
+        player2.commands.Clear();
         // checkForWinner(player1, player2);
     }
 

@@ -48,7 +48,6 @@ public class BattleField
     public readonly BattleFieldSetup setup;
     public BattleCell[,] field;
     public bool isInitialized = false;
-
     public BattleField(BattleFieldSetup gameManagerSetup)
     {
         setup = gameManagerSetup;

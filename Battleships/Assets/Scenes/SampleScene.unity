@@ -812,6 +812,8 @@ MonoBehaviour:
   shipSpawnParent: {fileID: 1701454970}
   cellPrefab: {fileID: 2687068710542369478, guid: 3e83cc11dc9c41c4a88b58930ffb0036,
     type: 3}
+  damagedCellPrefab: {fileID: 2687068710542369478, guid: 5a1b09deef4c5154c9b36b2eb5632acf,
+    type: 3}
   cellObjects: []
   shipObjects: []
   hoveredObject: {fileID: 0}
