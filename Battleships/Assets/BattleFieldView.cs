@@ -22,11 +22,12 @@ public class BattleFieldView : MonoBehaviour
 
     public void Initialize()
     {
-        cellPrefab.transform.localScale = new Vector3(gameManager.gameState.battleField.setup.cellSize, gameManager.gameState.battleField.setup.cellSize, gameManager.gameState.battleField.setup.cellSize);
+        GameState localgameState = gameManager.GetLocalGameState();
+        cellPrefab.transform.localScale = new Vector3(localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize);
 
-        for (int i = 0; i < gameManager.gameState.battleField.setup.horizCellsCount; i++)
+        for (int i = 0; i < localgameState.battleField.setup.horizCellsCount; i++)
         {
-            for (int j = 0; j < gameManager.gameState.battleField.setup.vertiCellsCount; j++)
+            for (int j = 0; j < localgameState.battleField.setup.vertiCellsCount; j++)
             {
                 GameObject cellGameObject = GameObject.Instantiate(cellPrefab, cellSpawnParent);
 
@@ -36,7 +37,7 @@ public class BattleFieldView : MonoBehaviour
 
                 newCellObject.battleFieldView = this;
 
-                cellGameObject.transform.position = gameManager.gameState.battleField.field[i, j].bottomLeftOrigin;
+                cellGameObject.transform.position = localgameState.battleField.field[i, j].bottomLeftOrigin;
 
                 cellObjects.Add(newCellObject);
             }
@@ -51,7 +52,7 @@ public class BattleFieldView : MonoBehaviour
     public int SpawnShipObject(int x, int y, StaticShipData shipData, RuntimeShipData runtimeShipData, Orientation orientation)
     {
         GameObject shipGameObject = GameObject.Instantiate(shipData.shipPrefab, shipSpawnParent);
-        shipGameObject.transform.position = gameManager.gameState.battleField.field[x, y].bottomLeftOrigin;
+        shipGameObject.transform.position = gameManager.GetLocalGameState().battleField.field[x, y].bottomLeftOrigin;
 
         ShipObject shipObject = shipGameObject.GetComponent<ShipObject>();
         shipObject.Initialize(runtimeShipData);

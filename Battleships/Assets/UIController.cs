@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
@@ -9,14 +10,16 @@ public class UIController : MonoBehaviour
 
     public GameObject shipButtonPrefab;
     public RectTransform shipButtonParent;
+    public Button submitButton;
 
-    [Header("Setup")]
+    [Header("Debug View")]
     public List<UIShipButton> shipButtons;
 
     void Start()
     {
         Initialize();
         EventManager.onShipAdded.AddListener(UpdateShipButtons);
+        submitButton.onClick.AddListener(OnSubmitButtonClicked);
     }
 
     // Update is called once per frame
@@ -28,6 +31,10 @@ public class UIController : MonoBehaviour
     public void OnShipButtonClicked(ShipType type)
     {
         gameManager.OnShipTypeSelected(type);
+    }
+    public void OnSubmitButtonClicked()
+    {
+        gameManager.OnSubmitSignalReceived();
     }
 
     public void Initialize()
@@ -48,7 +55,7 @@ public class UIController : MonoBehaviour
         for (int i = 0; i < (int)ShipType.Count; i++)
         {
             UIShipButton buttonObj = shipButtons[i];
-            buttonObj.UpdateShipCount(gameManager.gameState.shipManager.availableShipCounts[i]);
+            buttonObj.UpdateShipCount(gameManager.GetLocalGameState().shipManager.availableShipCounts[i]);
         }
     }
 }
