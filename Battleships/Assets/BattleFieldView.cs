@@ -37,8 +37,6 @@ public class BattleFieldView : MonoBehaviour
 
     public List<CellHitData> hitQueue = new List<CellHitData>();
 
-    private float cellSize;
-
     public void Initialize()
     {
         GameState localgameState = gameManager.GetLocalGameState();
