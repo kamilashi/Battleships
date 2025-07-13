@@ -6,7 +6,6 @@ using UnityEngine;
 public class BattleFieldView : MonoBehaviour
 {
     [Header("Manual Setup")]
-    public BattleField flowField;
     public GameManager gameManager;
 
     public Transform cellSpawnParent;
@@ -21,24 +20,13 @@ public class BattleFieldView : MonoBehaviour
     public CellObject hoveredObject;
     public bool isDebugRenderEnabled = false;
 
-    void Start()
+    public void Initialize()
     {
-        cellPrefab.transform.localScale = new Vector3(flowField.cellSize, flowField.cellSize, flowField.cellSize);
+        cellPrefab.transform.localScale = new Vector3(gameManager.gameState.battleField.setup.cellSize, gameManager.gameState.battleField.setup.cellSize, gameManager.gameState.battleField.setup.cellSize);
 
-        Initialize();
-    }
-
-    // Update is called once per frame
-    void Update()
-    {
-
-    }
-
-    void Initialize()
-    {
-        for (int i = 0; i < flowField.horizCellsCount; i++)
+        for (int i = 0; i < gameManager.gameState.battleField.setup.horizCellsCount; i++)
         {
-            for (int j = 0; j < flowField.vertiCellsCount; j++)
+            for (int j = 0; j < gameManager.gameState.battleField.setup.vertiCellsCount; j++)
             {
                 GameObject cellGameObject = GameObject.Instantiate(cellPrefab, cellSpawnParent);
 
@@ -48,7 +36,7 @@ public class BattleFieldView : MonoBehaviour
 
                 newCellObject.battleFieldView = this;
 
-                cellGameObject.transform.position = flowField.field[i, j].bottomLeftOrigin;
+                cellGameObject.transform.position = gameManager.gameState.battleField.field[i, j].bottomLeftOrigin;
 
                 cellObjects.Add(newCellObject);
             }
@@ -63,7 +51,7 @@ public class BattleFieldView : MonoBehaviour
     public int SpawnShipObject(int x, int y, StaticShipData shipData, RuntimeShipData runtimeShipData, Orientation orientation)
     {
         GameObject shipGameObject = GameObject.Instantiate(shipData.shipPrefab, shipSpawnParent);
-        shipGameObject.transform.position = flowField.field[x, y].bottomLeftOrigin;
+        shipGameObject.transform.position = gameManager.gameState.battleField.field[x, y].bottomLeftOrigin;
 
         ShipObject shipObject = shipGameObject.GetComponent<ShipObject>();
         shipObject.Initialize(runtimeShipData);
@@ -85,60 +73,4 @@ public class BattleFieldView : MonoBehaviour
         Destroy(shipGameObject);
         //shipObjects.RemoveAt(index);
     }
-
-/*
-    public void DestroyShipObject(ShipObject shipObject)
-    {
-        shipObjects.Remove(shipObject);
-        Destroy(shipObject);
-    }*/
-
-/*
-#if UNITY_EDITOR
-    void OnDrawGizmos()
-    {
-        if (!isDebugRenderEnabled || !flowField.isInitialized)
-        {
-            return;
-        }
-
-        RenderCells();
-    }
-
-    void RenderCells()
-    {
-        Gizmos.color = Color.magenta;
-        Vector3 from, to, temp;
-
-        for (int i = 0; i < flowField.horizCellsCount; i++)
-        {
-
-            for (int j = 0; j < flowField.vertiCellsCount; j++)
-            {
-                from = flowField.field[i, j].bottomLeftOrigin;
-                from.y = flowField.originTransformBottomLeft.position.y;
-
-                //from.x += flowField.cellSize * 0.5f;
-                //from.z += flowField.cellSize * 0.5f;
-
-                to = from;
-                to += flowField.field[i, j].velocity;
-
-                Gizmos.DrawLine(from, to);
-
-                from = to;
-                temp = Vector3.Cross(flowField.field[i, j].velocity, Vector3.up);
-                to += temp * 0.2f;
-                to -= flowField.field[i, j].velocity * 0.5f;
-
-                Gizmos.DrawLine(from, to);
-
-                to = from - temp * 0.2f;
-                to -= flowField.field[i, j].velocity * 0.5f;
-
-                Gizmos.DrawLine(from, to);
-            }
-        }
-    }
-#endif*/
 }

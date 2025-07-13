@@ -1,4 +1,5 @@
 using Library;
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -22,13 +23,6 @@ public struct BattleCell
     {
         return shipData == null;
     }
-
-    /*
-    public void ConnectShip(int id)
-    {
-        shipInstanceIndex = id;
-    }*/
-
     public void ConnectShip(RuntimeShipData shipData)
     {
         this.shipData = shipData;
@@ -39,57 +33,53 @@ public struct BattleCell
     }
 }
 
-public class BattleField : MonoBehaviour
+[Serializable]
+public class BattleFieldSetup
 {
-    [Header("Manual Setup")]
-    public int horizCellsCount = 4;
-    public int vertiCellsCount = 4;
+    public int horizCellsCount = 10;
+    public int vertiCellsCount = 10;
     public float cellSize = 1.0f;
 
     public Transform originTransformBottomLeft;
+}
 
-    [Header("Debug")]
-
-    public ShipType placedType;
-
-    [Header("Debug View")]
+public class BattleField
+{
+    public readonly BattleFieldSetup setup;
     public BattleCell[,] field;
     public bool isInitialized = false;
 
-    void Awake()
+    public BattleField(BattleFieldSetup gameManagerSetup)
     {
+        setup = gameManagerSetup;
         InitializeCells();
-        isInitialized = true;
-    }
-
-    void Update()
-    {
-        
     }
 
     void InitializeCells()
     {
-        field = new BattleCell[horizCellsCount, vertiCellsCount];
+        field = new BattleCell[setup.horizCellsCount, setup.vertiCellsCount];
 
-        for (int x= 0; x < horizCellsCount; x++)
+        for (int x= 0; x < setup.horizCellsCount; x++)
         {
-            for (int y = 0; y < vertiCellsCount; y++)
+            for (int y = 0; y < setup.vertiCellsCount; y++)
             {
                 ref BattleCell cell = ref field[x, y];
 
                 Vector3 cellOrigin;
-                cellOrigin.x = originTransformBottomLeft.position.x + x * cellSize;
-                cellOrigin.z = originTransformBottomLeft.position.z + y * cellSize;
-                cellOrigin.y = originTransformBottomLeft.position.y;
+                cellOrigin.x = setup.originTransformBottomLeft.position.x + x * setup.cellSize;
+                cellOrigin.z = setup.originTransformBottomLeft.position.z + y * setup.cellSize;
+                cellOrigin.y = setup.originTransformBottomLeft.position.y;
 
                 cell.Initialize(cellOrigin);
             }
         }
+
+        isInitialized = true;
     }
 
     private bool IsInRange(int x, int y)
     {
-        return x >= 0 && y >= 0 && x < horizCellsCount && y < vertiCellsCount;
+        return x >= 0 && y >= 0 && x < setup.horizCellsCount && y < setup.vertiCellsCount;
     }
 
     private bool IsPathFree(int x, int y, int length, Vector2Int direction, bool adjacentSpaceCheck)

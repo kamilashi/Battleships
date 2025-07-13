@@ -13,11 +13,19 @@ public enum GamePhase
     Build,
     Combat
 }
+
+public class GameState
+{
+    public BattleField battleField;
+}
+
 public class GameManager : MonoBehaviour
 {
+    [Header("BattleField Setup")]
+    public BattleFieldSetup battlefieldSetup;
+
     [Header("Manual Setup")]
     public BattleFieldView battlefieldView;
-    public BattleField battleField;
     public ShipManager shipManager;
 
     [Header("Debug View")]
@@ -26,15 +34,17 @@ public class GameManager : MonoBehaviour
     public ShipType selectedShipType;
     public Orientation shipOrientation;
 
+    public GameState gameState;
+
     void Awake()
     {
         currentPhase = GamePhase.Build;
-    }
+        gameState = new GameState();
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        BattleField battleField = new BattleField(battlefieldSetup);
+        gameState.battleField = battleField;
+
+        battlefieldView.Initialize();
     }
 
     private void TryPlaceShip(int x, int y, ShipType type)
@@ -46,7 +56,7 @@ public class GameManager : MonoBehaviour
         }
 
         StaticShipData shipData = shipManager.GetShipData(type);
-        if (!battleField.CanPlaceShip(x, y, shipData, shipOrientation))
+        if (!gameState.battleField.CanPlaceShip(x, y, shipData, shipOrientation))
         {
             Debug.Log("Cannot place ship here.");
             return;
@@ -56,7 +66,7 @@ public class GameManager : MonoBehaviour
 
         if (shipInstanceData != null)
         {
-            battleField.PlaceShip(x, y, shipInstanceData, shipData, shipOrientation);
+            gameState.battleField.PlaceShip(x, y, shipInstanceData, shipData, shipOrientation);
             int shipObjectId = battlefieldView.SpawnShipObject(x, y, shipData, shipInstanceData, shipOrientation);
             Debug.Assert(shipObjectId == shipInstanceData.instanceId);
             EventManager.onShipAdded?.Invoke();
@@ -64,10 +74,9 @@ public class GameManager : MonoBehaviour
     }
     private void TryHitShip(int x, int y)
     {
-        if (!battleField.field[x, y].IsFree())
+        if (!gameState.battleField.field[x, y].IsFree())
         {
-            int shipIndex = battleField.field[x, y].shipData.instanceId;
-            //RuntimeShipData shipData = battleField.field[x, y].shipData;
+            int shipIndex = gameState.battleField.field[x, y].shipData.instanceId;
             HitResult hitResult = shipManager.HitShip(shipIndex);
 
             if(hitResult == HitResult.Killed)
@@ -81,7 +90,7 @@ public class GameManager : MonoBehaviour
                 Debug.Log("Damaged ship");
             }
 
-            battleField.ClearCell(x, y);
+            gameState.battleField.ClearCell(x, y);
         }
     }
 
