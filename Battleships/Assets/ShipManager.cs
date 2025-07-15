@@ -1,3 +1,4 @@
+using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
@@ -93,16 +94,18 @@ public class ShipManagerSetupData // #TODO: move to a scriptable object
     public GameObject quadrupleUnitPrefab;
 }
 
+[Serializable]
 public class ShipManager
 {
     public ShipManagerSetupData setupData;
 
-    public int totalShipCount = 0;
     public List<StaticShipData> shipDatas;
 
+    // to de synced
     public List<int> availableShipCounts = new List<int>();
     public List<int> currentShipCounts = new List<int>();
     public List<RuntimeShipData> shipInstances = new List<RuntimeShipData>();
+    public int totalShipCount = 0;
 
     public ShipManager(ShipManagerSetupData shipManagerSetupData)
     {

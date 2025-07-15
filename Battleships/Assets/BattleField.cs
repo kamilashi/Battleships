@@ -1,20 +1,30 @@
 using Library;
+using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public struct BattleCell
+[Serializable]
+public class BattleCell
 {
-    public Vector3 bottomLeftOrigin;
+    private float[] bottomLeftOrigin;
     public RuntimeShipData shipData;
     public void Initialize(Vector3 origin)
     {
-        bottomLeftOrigin.x = origin.x;
-        bottomLeftOrigin.y = origin.y;
-        bottomLeftOrigin.z = origin.z;
+        bottomLeftOrigin = new float[3];
+        bottomLeftOrigin[0] = origin.x;
+        bottomLeftOrigin[1] = origin.y;
+        bottomLeftOrigin[2] = origin.z;
 
-        shipData = null;
+        Reset();
+    }
+    public void Initialize(float[] origin)
+    {
+        bottomLeftOrigin = new float[3];
+        bottomLeftOrigin[0] = origin[0];
+        bottomLeftOrigin[1] = origin[1];
+        bottomLeftOrigin[2] = origin[2];
 
         Reset();
     }
@@ -31,6 +41,17 @@ public struct BattleCell
     {
         shipData = null;
     }
+
+    public Vector3 getBottomLeftOrigin()
+    {
+        Vector3 result = new Vector3 (bottomLeftOrigin[0], bottomLeftOrigin[1], bottomLeftOrigin[2]);
+        return result;
+    }
+
+    public float[] getBottomLeftOriginRaw()
+    {
+        return bottomLeftOrigin;
+    }
 }
 
 [Serializable]
@@ -46,8 +67,8 @@ public class BattleFieldSetup
 public class BattleField
 {
     public readonly BattleFieldSetup setup;
-    public BattleCell[,] field;
-    public bool isInitialized = false;
+
+    public BattleCell[] field;                 // to de synced
     public BattleField(BattleFieldSetup gameManagerSetup)
     {
         setup = gameManagerSetup;
@@ -56,13 +77,13 @@ public class BattleField
 
     void InitializeCells()
     {
-        field = new BattleCell[setup.horizCellsCount, setup.vertiCellsCount];
+        field = new BattleCell[setup.horizCellsCount * setup.vertiCellsCount];
 
         for (int x= 0; x < setup.horizCellsCount; x++)
         {
             for (int y = 0; y < setup.vertiCellsCount; y++)
             {
-                ref BattleCell cell = ref field[x, y];
+                BattleCell cell = new BattleCell();
 
                 Vector3 cellOrigin;
                 cellOrigin.x = setup.originTransformBottomLeft.position.x + x * setup.cellSize;
@@ -70,10 +91,10 @@ public class BattleField
                 cellOrigin.y = setup.originTransformBottomLeft.position.y;
 
                 cell.Initialize(cellOrigin);
+
+                field[x * setup.vertiCellsCount + y] = cell;
             }
         }
-
-        isInitialized = true;
     }
 
     private bool IsInRange(int x, int y)
@@ -93,14 +114,14 @@ public class BattleField
 
             if(adjacentSpaceCheck)
             {
-                if (IsInRange(coordX, coordY) && !field[coordX, coordY].IsFree())
+                if (IsInRange(coordX, coordY) && !field[coordX * setup.vertiCellsCount + coordY].IsFree())
                 {
                     return false;
                 }
             }
             else
             {
-                if (!IsInRange(coordX, coordY) || !field[coordX, coordY].IsFree())
+                if (!IsInRange(coordX, coordY) || !field[coordX * setup.vertiCellsCount + coordY].IsFree())
                 {
                     return false;
                 }
@@ -125,7 +146,7 @@ public class BattleField
         cellCoords.x = x - orientation.x;
         cellCoords.y = y - orientation.y;
 
-        areCellsFree = !IsInRange(cellCoords.x, cellCoords.y) || field[cellCoords.x, cellCoords.y].IsFree();
+        areCellsFree = !IsInRange(cellCoords.x, cellCoords.y) || field[cellCoords.x * setup.vertiCellsCount + cellCoords.y].IsFree();
 
         Vector2Int localRight = Helpers.GetRightCWVector(orientation);
         cellCoords += localRight;
@@ -145,7 +166,7 @@ public class BattleField
         cellCoords.x = x + shipSize * orientation.x;
         cellCoords.y = y + shipSize * orientation.y;
 
-        areCellsFree = !IsInRange(cellCoords.x, cellCoords.y) || field[cellCoords.x, cellCoords.y].IsFree();
+        areCellsFree = !IsInRange(cellCoords.x, cellCoords.y) || field[cellCoords.x * setup.vertiCellsCount + cellCoords.y].IsFree();
         return areCellsFree;
     }
 
@@ -159,14 +180,25 @@ public class BattleField
             cellCoords.x = x + i * orientation.x;
             cellCoords.y = y + i * orientation.y;
 
-            ref BattleCell cell = ref field[cellCoords.x, cellCoords.y];
+            ref BattleCell cell = ref field[cellCoords.x * setup.vertiCellsCount + cellCoords.y];
             cell.ConnectShip(runtimeShipData);
         }
     }
 
     public void ClearCell(int x, int y)
     {
-        ref BattleCell cell = ref field[x, y];
-        cell.Reset();
+        GetCell(x, y).Reset();
+    }
+    public BattleCell GetCell(int x, int y)
+    {
+        return field[x * setup.vertiCellsCount + y];
+    }
+    public BattleCell GetCell(BattleCell[] externalField, int x, int y)
+    {
+        return externalField[x * setup.vertiCellsCount + y];
+    }
+    public int GetFieldSize()
+    {
+        return setup.vertiCellsCount * setup.horizCellsCount;
     }
 }
