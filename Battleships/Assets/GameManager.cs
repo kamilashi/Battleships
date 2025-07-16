@@ -98,9 +98,16 @@ public class GameManager : NetworkBehaviour
         }
 
         int playerIndex = playerControllers.Count;
-        playerControllers.Add(player);
 
-        player.RpcInitializeClient(player.connectionToClient, playerIndex);
+        if(!player.isLocalPlayer)
+        {
+            player.Initialize();
+        }
+
+        player.RpcInitializeClient(player.connectionToClient);
+
+        player.syncedState.playerId = playerIndex;
+        playerControllers.Add(player);
     }
 
     private void TryHitShip(int x, int y, PlayerController targetPlayer)

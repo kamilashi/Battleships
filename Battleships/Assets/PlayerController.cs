@@ -75,9 +75,8 @@ public class PlayerController : NetworkBehaviour
     }
 
     [TargetRpc]
-    public void RpcInitializeClient(NetworkConnectionToClient conn, int networkPlayerId)
+    public void RpcInitializeClient(NetworkConnectionToClient conn)
     {
-        syncedState.playerId = networkPlayerId;
         Initialize();
     }
 
@@ -240,13 +239,13 @@ public class PlayerController : NetworkBehaviour
     }
 
     [TargetRpc]
-    public void DeserializeGameState(SyncedGameState gameState)
+    public void RpcDeserializeGameState(SyncedGameState gameState)
     {
         this.syncedState = gameState;
     }
     public void UnpackSyncedGameState()
     {
-        int cellCount = gameState.battleField.GetFieldSize();
+        int cellCount = syncedState.field.Count();
 
         gameState.battleField.field = new BattleCell[cellCount];
         for (int i = 0; i < cellCount; i++)
@@ -265,7 +264,7 @@ public class PlayerController : NetworkBehaviour
             gameState.battleField.field[i] = cell;
         }
 
-        int shipsCount = gameState.shipManager.totalShipCount;
+        int shipsCount = syncedState.shipInstances.Count();
 
         gameState.shipManager.shipInstances = new List<RuntimeShipData>();
         for (int i = 0; i < shipsCount; i++)
