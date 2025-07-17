@@ -2,7 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
-public class ShipObject : MonoBehaviour
+public class ShipObject : MonoBehaviour, IVisualSpawner
 {
     public RuntimeShipData shipData;
     public float objectHeight = 1.0f;

@@ -9,7 +9,7 @@ public struct CellData
     public Vector2Int index;
 }
 
-public class CellObject : MonoBehaviour, IHoverable, IClickable
+public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
 {
     [Header("Setup in Prefab")]
     public MeshRenderer meshRenderer;
@@ -43,6 +43,20 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable
     {
         meshRenderer.GetPropertyBlock(mpb); 
         mpb.SetFloat(propertyName, value);
-        meshRenderer.SetPropertyBlock(mpb); 
+        meshRenderer.SetPropertyBlock(mpb);
+    }
+    public void SpawnChild(GameObject child, Vector3 localPosition)
+    {
+        GameObject shipGameObject = GameObject.Instantiate(child, this.transform);
+
+        shipGameObject.transform.localPosition = localPosition;
+    }
+    public void SpawnChildWithGlobalPosition(GameObject child, Vector3 globalPosition)
+    {
+        GameObject shipGameObject = GameObject.Instantiate(child, this.transform);
+
+        Vector3 localPosition = transform.InverseTransformPoint(globalPosition);
+
+        shipGameObject.transform.localPosition = localPosition;
     }
 }

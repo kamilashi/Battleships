@@ -186,35 +186,6 @@ public class ShipManager
         return HitResult.Damaged;
     }
 
-    public HitResult HitShip(SyncedGameState syncedGameState, int shipInstanceIndex)
-    {
-        int newHealth = syncedGameState.shipInstances[shipInstanceIndex].Damage();
-
-        if (newHealth <= 0)
-        {
-            syncedGameState.currentShipCounts[syncedGameState.shipInstances[shipInstanceIndex].Index()]--;
-            syncedGameState.totalShipCount--;
-            return HitResult.Killed;
-        }
-
-        return HitResult.Damaged;
-    }
-
-/*
-    public HitResult HitShip(RuntimeShipData runtimeShipData)
-    {
-        int newHealth = runtimeShipData.Damage();
-
-        if (newHealth <= 0)
-        {
-            currentShipCounts[runtimeShipData.Index()]--;
-            totalShipCount--;
-            return HitResult.Killed;
-        }
-
-        return HitResult.Damaged;
-    }*/
-
     public int GetAvailableShipsOfType(ShipType type)
     {
         return availableShipCounts[(int)type];

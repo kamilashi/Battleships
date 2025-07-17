@@ -52,11 +52,14 @@ public class GameManager : NetworkBehaviour
 
     public List<PlayerController> playerControllers = new List<PlayerController>();
     [SerializeField] private GamePhase currentGamePhase;
+    [SerializeField] private int currentTurnCount;
 
     void Awake()
     {
         PlayerController.onPlayerSpawnedEvent.AddListener(RegisterPlayer);
-        PlayerController.onSubmitSignalIssuedEvent.AddListener(LogSubmissionSignal);
+        PlayerController.onPlayerDespawnedEvent.AddListener(DeregisterPlayer);
+        // PlayerController.onSubmitSignalIssuedEvent.AddListener(LogSubmissionSignal);
+        currentTurnCount = 0;
     }
 
     void FixedUpdate()
@@ -68,6 +71,11 @@ public class GameManager : NetworkBehaviour
 
         if (playerControllers[0].syncedState.submitSignalReceived && playerControllers[1].syncedState.submitSignalReceived) 
         {
+            foreach (PlayerController playerController in playerControllers)
+            {
+                playerController.DeserializeGameState();
+            }
+
             ProcessTurn(playerControllers[0], playerControllers[1]); 
 
             if(currentGamePhase == GamePhase.Build)
@@ -75,19 +83,25 @@ public class GameManager : NetworkBehaviour
                 currentGamePhase = GamePhase.Combat;
             }
 
+            currentTurnCount++;
+
             foreach (PlayerController playerController in playerControllers)
             {
                 playerController.syncedState.submitSignalReceived = false;
                 playerController.syncedState.gamePhase = currentGamePhase;
+                playerController.SerializeGameState();
+
+                playerController.RpcSyncGameStateWClient(playerController.connectionToClient, playerController.syncedState);
                 playerController.RpcOnTurnFinished(playerController.connectionToClient);
             }
         }
     }
 
+/*
     private void LogSubmissionSignal(int playerId)
     {
         playerControllers[playerId].syncedState.submitSignalReceived = true;
-    }
+    }*/
 
     private void RegisterPlayer(PlayerController player)
     {
@@ -109,10 +123,14 @@ public class GameManager : NetworkBehaviour
         player.syncedState.playerId = playerIndex;
         playerControllers.Add(player);
     }
+    private void DeregisterPlayer(PlayerController player)
+    {
+        playerControllers.Remove(player);
+    }
 
     private void TryHitShip(int x, int y, PlayerController targetPlayer)
     {
-        targetPlayer.UnpackSyncedGameState();
+        //targetPlayer.UnpackSyncedGameState();
         GameLogic targetGameState = targetPlayer.GetLocalGameState();
         
         HitResult hitResult = HitResult.None;
@@ -141,7 +159,7 @@ public class GameManager : NetworkBehaviour
             Debug.Log("Missed!");
         }
 
-        targetPlayer.PackSyncedGameState(); 
+       // targetPlayer.PackSyncedGameState(); 
 
         CellHitData cellHitData = new CellHitData(hitResult, shipIndex, x, y);
         targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, cellHitData);

@@ -5,6 +5,12 @@ using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Assertions;
 
+public interface IVisualSpawner
+{
+    public void SpawnChild(GameObject child, Vector3 localPosition);
+    public void SpawnChildWithGlobalPosition(GameObject child, Vector3 globalPosition);
+}
+
 [Serializable]
 public struct CellHitData
 {
@@ -60,7 +66,7 @@ public class BattleFieldView : MonoBehaviour
 
     public void Initialize()
     {
-        GameState localgameState = localPlayerController.GetLocalGameState();
+        GameLogic localgameState = localPlayerController.GetLocalGameState();
         cellPrefab.transform.localScale = new Vector3(localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize);
 
         for (int i = 0; i < localgameState.battleField.setup.horizCellsCount; i++)
@@ -96,6 +102,16 @@ public class BattleFieldView : MonoBehaviour
         position.y += damagedShip.objectHeight;
 
         damagedShip.SpawnChildWithGlobalPosition(damagedCellPrefab, position);
+    }
+    public void VisualizeCellMiss(CellHitData hitData)
+    {
+        GameLogic localGameState = localPlayerController.GetLocalGameState();
+        BattleCell cell = localGameState.battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
+
+        Vector3 position = cell.getBottomLeftOrigin();
+
+        int cellObjectIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
+        cellObjects[cellObjectIndex].SpawnChildWithGlobalPosition(damagedCellPrefab, position);
     }
 
     public void OnShipAdded(PlayerController player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
@@ -166,7 +182,7 @@ public class BattleFieldView : MonoBehaviour
                     Debug.Log("Here should be a visualizer for a killer hit!");
                     break;
                 case HitResult.None:
-                    Debug.Log("Here should be a visualized miss!");
+                    VisualizeCellMiss(hitData);
                     break;
             }
         }

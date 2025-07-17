@@ -189,17 +189,13 @@ public class BattleField
     {
         GetCell(x, y).Reset();
     }
-    public void ClearCell(BattleCell[] externalField, int x, int y)
-    {
-        GetCell(externalField, x, y).Reset();
-    }
     public BattleCell GetCell(int x, int y)
     {
         return field[x * setup.vertiCellsCount + y];
     }
-    public BattleCell GetCell(BattleCell[] externalField, int x, int y)
+    public int GetFlatCellIndex(int x, int y)
     {
-        return externalField[x * setup.vertiCellsCount + y];
+        return x * setup.vertiCellsCount + y;
     }
     public int GetFieldSize()
     {
