@@ -8,7 +8,7 @@ using UnityEngine;
 [Serializable]
 public class BattleCell
 {
-    private float[] bottomLeftOrigin;
+    public float[] bottomLeftOrigin;
     public RuntimeShipData shipData;
     public void Initialize(Vector3 origin)
     {
@@ -188,6 +188,10 @@ public class BattleField
     public void ClearCell(int x, int y)
     {
         GetCell(x, y).Reset();
+    }
+    public void ClearCell(BattleCell[] externalField, int x, int y)
+    {
+        GetCell(externalField, x, y).Reset();
     }
     public BattleCell GetCell(int x, int y)
     {

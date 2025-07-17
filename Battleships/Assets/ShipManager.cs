@@ -185,6 +185,21 @@ public class ShipManager
 
         return HitResult.Damaged;
     }
+
+    public HitResult HitShip(SyncedGameState syncedGameState, int shipInstanceIndex)
+    {
+        int newHealth = syncedGameState.shipInstances[shipInstanceIndex].Damage();
+
+        if (newHealth <= 0)
+        {
+            syncedGameState.currentShipCounts[syncedGameState.shipInstances[shipInstanceIndex].Index()]--;
+            syncedGameState.totalShipCount--;
+            return HitResult.Killed;
+        }
+
+        return HitResult.Damaged;
+    }
+
 /*
     public HitResult HitShip(RuntimeShipData runtimeShipData)
     {

@@ -17,12 +17,12 @@ public enum PlayerCommandType
     Count
 }
 
-public class GameState
+public class GameLogic
 {
     public BattleField battleField;
     public ShipManager shipManager;
 
-    public GameState(BattleFieldSetup battlefieldSetup, ShipManagerSetupData shipManagerSetup)
+    public GameLogic(BattleFieldSetup battlefieldSetup, ShipManagerSetupData shipManagerSetup)
     {
         battleField = new BattleField(battlefieldSetup);
         shipManager = new ShipManager(shipManagerSetup);
@@ -113,7 +113,7 @@ public class GameManager : NetworkBehaviour
     private void TryHitShip(int x, int y, PlayerController targetPlayer)
     {
         targetPlayer.UnpackSyncedGameState();
-        GameState targetGameState = targetPlayer.GetLocalGameState();
+        GameLogic targetGameState = targetPlayer.GetLocalGameState();
         
         HitResult hitResult = HitResult.None;
         int shipIndex = -1;
