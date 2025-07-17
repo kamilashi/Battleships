@@ -10,6 +10,7 @@ public class BattleCell
 {
     public float[] bottomLeftOrigin;
     public RuntimeShipData shipData;
+    public bool wasHitOnce;
     public void Initialize(Vector3 origin)
     {
         bottomLeftOrigin = new float[3];

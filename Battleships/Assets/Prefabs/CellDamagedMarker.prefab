@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4007368876279937829}
   - component: {fileID: 4403272125962963993}
   m_Layer: 6
-  m_Name: CellDamaged
+  m_Name: CellDamagedMarker
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0

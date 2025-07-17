@@ -17,14 +17,16 @@ public struct CellHitData
     public int[] hitCellCoords;
     public HitResult hitResult;
     public int shipInstanceIndex;
+    public bool sourceIsOpponent;
 
-    public CellHitData(HitResult result, int shipId, int coordX, int coordY)
+    public CellHitData(HitResult result, int shipId, int coordX, int coordY, bool sourceIsOpponent)
     {
         hitResult = result;
         hitCellCoords = new int[2];
         hitCellCoords[0] = coordX;
         hitCellCoords[1] = coordY;
         shipInstanceIndex = shipId;
+        this.sourceIsOpponent = sourceIsOpponent;
     }
 }
 
@@ -36,7 +38,8 @@ public class BattleFieldView : MonoBehaviour
 
     [Header("Visualization")]
     public GameObject cellPrefab;
-    public GameObject damagedCellPrefab;
+    public GameObject damagedCellMarkerPrefab;
+    public GameObject missedCellMarkerPrefab;
 
     [Header("DebugView")]
     public PlayerController localPlayerController;
@@ -52,7 +55,6 @@ public class BattleFieldView : MonoBehaviour
         PlayerController.onTurnFinished.AddListener(ProcessCellHits);
         PlayerController.onShipAdded.AddListener(OnShipAdded);
         PlayerController.onShipDestroyed.AddListener(OnShipDestroyed);
-        //PlayerController.onCellHit.AddListener(OnCellHit);
     }
 
     public void OnLocalPlayerInitialized(PlayerController localPlayer)
@@ -66,7 +68,7 @@ public class BattleFieldView : MonoBehaviour
 
     public void Initialize()
     {
-        GameLogic localgameState = localPlayerController.GetLocalGameState();
+        LocalGameState localgameState = localPlayerController.GetLocalGameState();
         cellPrefab.transform.localScale = new Vector3(localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize);
 
         for (int i = 0; i < localgameState.battleField.setup.horizCellsCount; i++)
@@ -95,23 +97,35 @@ public class BattleFieldView : MonoBehaviour
 
    public void VisualizeCellHit(CellHitData hitData)
     {
-        ShipObject damagedShip =  shipObjects[hitData.shipInstanceIndex];
-        BattleCell cell = localPlayerController.GetLocalGameState().battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
+        if(hitData.sourceIsOpponent)
+        {
+            ShipObject damagedShip = shipObjects[hitData.shipInstanceIndex];
+        }
+        else
+        {
+            ShipObject damagedShip = shipObjects[hitData.shipInstanceIndex];
+            BattleCell cell = localPlayerController.GetLocalGameState().battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
 
-        Vector3 position = cell.getBottomLeftOrigin();
-        position.y += damagedShip.objectHeight;
+            Vector3 position = cell.getBottomLeftOrigin();
+            position.y += damagedShip.objectHeight;
 
-        damagedShip.SpawnChildWithGlobalPosition(damagedCellPrefab, position);
+            damagedShip.SpawnChildWithGlobalPosition(damagedCellMarkerPrefab, position);
+        }
     }
+    public void VisualizeCellKill(CellHitData hitData)
+    {
+        VisualizeCellHit(hitData);
+    }
+
     public void VisualizeCellMiss(CellHitData hitData)
     {
-        GameLogic localGameState = localPlayerController.GetLocalGameState();
+        LocalGameState localGameState = localPlayerController.GetLocalGameState();
         BattleCell cell = localGameState.battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
 
         Vector3 position = cell.getBottomLeftOrigin();
 
         int cellObjectIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
-        cellObjects[cellObjectIndex].SpawnChildWithGlobalPosition(damagedCellPrefab, position);
+        cellObjects[cellObjectIndex].SpawnChildWithGlobalPosition(missedCellMarkerPrefab, position);
     }
 
     public void OnShipAdded(PlayerController player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
@@ -180,6 +194,8 @@ public class BattleFieldView : MonoBehaviour
                     break;
                 case HitResult.Killed:
                     Debug.Log("Here should be a visualizer for a killer hit!");
+                    VisualizeCellKill(hitData);
+                    //#TODO: if source is self, mark all fields around the ship as missed and mark the last damaged ship
                     break;
                 case HitResult.None:
                     VisualizeCellMiss(hitData);

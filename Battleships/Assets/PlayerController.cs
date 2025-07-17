@@ -30,7 +30,6 @@ public class PlayerController : NetworkBehaviour
     // player -> server
     public static UnityEvent<PlayerController> onPlayerSpawnedEvent = new UnityEvent<PlayerController>();
     public static UnityEvent<PlayerController> onPlayerDespawnedEvent = new UnityEvent<PlayerController>();
-    //public static UnityEvent<int> onSubmitSignalIssuedEvent = new UnityEvent<int>();
 
     // server -> player
     public static UnityEvent onTurnFinished = new UnityEvent();
@@ -40,10 +39,9 @@ public class PlayerController : NetworkBehaviour
     public static UnityEvent<PlayerController, Vector2Int, RuntimeShipData, Orientation> onShipAdded = new UnityEvent<PlayerController, Vector2Int, RuntimeShipData, Orientation>();
     public static UnityEvent<PlayerController, int> onShipDestroyed = new UnityEvent<PlayerController, int>();
 
-    private GameLogic gameLogic;
+    private LocalGameState localGameState;
 
     [SyncVar] public SyncedGameState syncedState;
-
 
     public List<CellHitData> hitQueue = new List<CellHitData>();
 
@@ -72,31 +70,30 @@ public class PlayerController : NetworkBehaviour
         syncedState.commands = new List<PlayerCommand>();
 
         GlobalSetup setup = GlobalSetup.Instance();
-        gameLogic = new GameLogic(setup.battlefieldSetup, setup.shipManagerSetup);
+        localGameState = new LocalGameState(setup.battlefieldSetup, setup.shipManagerSetup);
 
         onLocalPlayerInitializedEvent?.Invoke(this);
     }
     private void TryPlaceShip(int x, int y, ShipType type)
     {
-        GameLogic localGameState = gameLogic;
         if (type == ShipType.Count)
         {
             Debug.Log("Choose a ship to place first.");
             return;
         }
 
-        StaticShipData shipData = gameLogic.shipManager.GetShipData(type);
-        if (!gameLogic.battleField.CanPlaceShip(x, y, shipData, syncedState.shipOrientation))
+        StaticShipData shipData = localGameState.shipManager.GetShipData(type);
+        if (!localGameState.battleField.CanPlaceShip(x, y, shipData, syncedState.shipOrientation))
         {
             Debug.Log("Cannot place ship here.");
             return;
         }
 
-        RuntimeShipData shipInstanceData = gameLogic.shipManager.CreateShip(type, x, y, syncedState.shipOrientation);
+        RuntimeShipData shipInstanceData = localGameState.shipManager.CreateShip(type, x, y, syncedState.shipOrientation);
 
         if (shipInstanceData != null)
         {
-            gameLogic.battleField.PlaceShip(x, y, shipInstanceData, shipData, syncedState.shipOrientation);
+            localGameState.battleField.PlaceShip(x, y, shipInstanceData, shipData, syncedState.shipOrientation);
             onShipAdded?.Invoke(this, new Vector2Int(x, y), shipInstanceData, syncedState.shipOrientation);
         }
     }
@@ -145,10 +142,17 @@ public class PlayerController : NetworkBehaviour
         SerializeGameState();
         CmdSyncGameStateWServer(this.syncedState);
     }
-    public void StoreHitInput(int x, int y)
+    public void TryStoreHitInput(int x, int y)
     {
-        syncedState.hitCoords[0] = x;
-        syncedState.hitCoords[1] = y;
+        if(!localGameState.battleField.GetCell(x, y).wasHitOnce)
+        {
+            syncedState.hitCoords[0] = x;
+            syncedState.hitCoords[1] = y;
+        }
+        else
+        {
+            Debug.Log("You cannot hit the same cell twice!");
+        }
     }
     public void ClearHitInput()
     {
@@ -171,7 +175,7 @@ public class PlayerController : NetworkBehaviour
                 }
             case GamePhase.Combat:
                 {
-                    StoreHitInput(x, y);
+                    TryStoreHitInput(x, y);
                     break;
                 }
         }
@@ -179,12 +183,12 @@ public class PlayerController : NetworkBehaviour
 
     public List<StaticShipData> GetShipDataList()
     {
-        return gameLogic.shipManager.shipDatas;
+        return localGameState.shipManager.shipDatas;
     }
 
-    public GameLogic GetLocalGameState()
+    public LocalGameState GetLocalGameState()
     {
-        return gameLogic;
+        return localGameState;
     }
     public SyncedGameState GetSyncedGameState()
     {
@@ -244,15 +248,16 @@ public class PlayerController : NetworkBehaviour
     }
     public void SerializeGameState()
     {
-        int cellCount = gameLogic.battleField.GetFieldSize();
+        int cellCount = localGameState.battleField.GetFieldSize();
 
         syncedState.field = new BattleCell[cellCount];
         for (int i = 0; i < cellCount; i++)
         {
-            BattleCell extCell = gameLogic.battleField.field[i];
+            BattleCell extCell = localGameState.battleField.field[i];
 
             BattleCell cell = new BattleCell();
             cell.Initialize(extCell.getBottomLeftOriginRaw());
+            cell.wasHitOnce = extCell.wasHitOnce;
 
             if (!extCell.IsFree())
             {
@@ -263,12 +268,12 @@ public class PlayerController : NetworkBehaviour
             syncedState.field[i] = cell;
         }
 
-        int shipsCount = gameLogic.shipManager.totalShipCount;
+        int shipsCount = localGameState.shipManager.totalShipCount;
 
         syncedState.shipInstances = new RuntimeShipData[shipsCount];
         for (int i = 0; i < shipsCount; i++)
         {
-            RuntimeShipData extShipData = gameLogic.shipManager.shipInstances[i];
+            RuntimeShipData extShipData = localGameState.shipManager.shipInstances[i];
 
             RuntimeShipData shipData = new RuntimeShipData();
             shipData.Initialize(extShipData.health, extShipData.type, extShipData.instanceId);
@@ -282,22 +287,23 @@ public class PlayerController : NetworkBehaviour
 
         for (int i = 0; i < shipTypeCount; i++)
         {
-            syncedState.currentShipCounts[i] = gameLogic.shipManager.currentShipCounts[i];
+            syncedState.currentShipCounts[i] = localGameState.shipManager.currentShipCounts[i];
         }
 
-        syncedState.totalShipCount = gameLogic.shipManager.totalShipCount;
+        syncedState.totalShipCount = localGameState.shipManager.totalShipCount;
     }
     public void DeserializeGameState()
     {
         int cellCount = syncedState.field.Count();
 
-        gameLogic.battleField.field = new BattleCell[cellCount];
+        localGameState.battleField.field = new BattleCell[cellCount];
         for (int i = 0; i < cellCount; i++)
         {
             BattleCell extCell = syncedState.field[i];
 
             BattleCell cell = new BattleCell();
             cell.Initialize(extCell.getBottomLeftOriginRaw());
+            cell.wasHitOnce = extCell.wasHitOnce;
 
             if (!extCell.IsFree())
             {
@@ -305,12 +311,12 @@ public class PlayerController : NetworkBehaviour
                 cell.shipData.Initialize(extCell.shipData.health, extCell.shipData.type, extCell.shipData.instanceId);
             }
 
-            gameLogic.battleField.field[i] = cell;
+            localGameState.battleField.field[i] = cell;
         }
 
         int shipsCount = syncedState.shipInstances.Count();
 
-        gameLogic.shipManager.shipInstances = new List<RuntimeShipData>();
+        localGameState.shipManager.shipInstances = new List<RuntimeShipData>();
         for (int i = 0; i < shipsCount; i++)
         {
             RuntimeShipData extShipData = syncedState.shipInstances[i];
@@ -318,18 +324,18 @@ public class PlayerController : NetworkBehaviour
             RuntimeShipData shipData = new RuntimeShipData();
             shipData.Initialize(extShipData.health, extShipData.type, extShipData.instanceId);
 
-            gameLogic.shipManager.shipInstances.Add(shipData);
+            localGameState.shipManager.shipInstances.Add(shipData);
         }
 
 
         int shipTypeCount = (int)ShipType.Count;
-        gameLogic.shipManager.currentShipCounts = new List<int>();
+        localGameState.shipManager.currentShipCounts = new List<int>();
 
         for (int i = 0; i < shipTypeCount; i++)
         {
-            gameLogic.shipManager.currentShipCounts.Add(syncedState.currentShipCounts[i]);
+            localGameState.shipManager.currentShipCounts.Add(syncedState.currentShipCounts[i]);
         }
 
-        gameLogic.shipManager.totalShipCount = syncedState.totalShipCount;
+        localGameState.shipManager.totalShipCount = syncedState.totalShipCount;
     }
 }

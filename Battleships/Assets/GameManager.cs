@@ -17,12 +17,12 @@ public enum PlayerCommandType
     Count
 }
 
-public class GameLogic
+public class LocalGameState
 {
     public BattleField battleField;
     public ShipManager shipManager;
 
-    public GameLogic(BattleFieldSetup battlefieldSetup, ShipManagerSetupData shipManagerSetup)
+    public LocalGameState(BattleFieldSetup battlefieldSetup, ShipManagerSetupData shipManagerSetup)
     {
         battleField = new BattleField(battlefieldSetup);
         shipManager = new ShipManager(shipManagerSetup);
@@ -58,7 +58,6 @@ public class GameManager : NetworkBehaviour
     {
         PlayerController.onPlayerSpawnedEvent.AddListener(RegisterPlayer);
         PlayerController.onPlayerDespawnedEvent.AddListener(DeregisterPlayer);
-        // PlayerController.onSubmitSignalIssuedEvent.AddListener(LogSubmissionSignal);
         currentTurnCount = 0;
     }
 
@@ -128,10 +127,10 @@ public class GameManager : NetworkBehaviour
         playerControllers.Remove(player);
     }
 
-    private void TryHitShip(int x, int y, PlayerController targetPlayer)
+    private void TryHitShip(int x, int y, PlayerController attackerPlayer, PlayerController targetPlayer)
     {
         //targetPlayer.UnpackSyncedGameState();
-        GameLogic targetGameState = targetPlayer.GetLocalGameState();
+        LocalGameState targetGameState = targetPlayer.GetLocalGameState();
         
         HitResult hitResult = HitResult.None;
         int shipIndex = -1;
@@ -153,6 +152,9 @@ public class GameManager : NetworkBehaviour
             }
 
             targetGameState.battleField.ClearCell(x, y);
+
+            CellHitData otherHitData = new CellHitData(HitResult.Damaged, shipIndex, x, y, true);
+            targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, otherHitData);
         }
         else
         {
@@ -161,8 +163,8 @@ public class GameManager : NetworkBehaviour
 
        // targetPlayer.PackSyncedGameState(); 
 
-        CellHitData cellHitData = new CellHitData(hitResult, shipIndex, x, y);
-        targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, cellHitData);
+        CellHitData selfHitData = new CellHitData(hitResult, shipIndex, x, y, false);
+        attackerPlayer.RpcOnCellHit(attackerPlayer.connectionToClient, selfHitData);
     }
 
     public void ProcessTurn(PlayerController player1, PlayerController player2)
@@ -189,7 +191,7 @@ public class GameManager : NetworkBehaviour
         {
             case PlayerCommandType.FireHit:
                 {
-                    TryHitShip(command.coordX, command.coordY, opponent);
+                    TryHitShip(command.coordX, command.coordY, owner, opponent);
                     break;
                 }
             case PlayerCommandType.Count:

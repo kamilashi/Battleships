@@ -809,6 +809,7 @@ MonoBehaviour:
   syncInterval: 0
   playerControllers: []
   currentGamePhase: 0
+  currentTurnCount: 0
 --- !u!114 &848502403
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1376,8 +1377,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   battlefieldSetup:
-    horizCellsCount: 2
-    vertiCellsCount: 2
+    horizCellsCount: 10
+    vertiCellsCount: 10
     cellSize: 1
     originTransformBottomLeft: {fileID: 1294106682}
   shipManagerSetup:

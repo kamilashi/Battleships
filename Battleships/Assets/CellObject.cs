@@ -47,16 +47,18 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
     }
     public void SpawnChild(GameObject child, Vector3 localPosition)
     {
-        GameObject shipGameObject = GameObject.Instantiate(child, this.transform);
+        GameObject childObject = GameObject.Instantiate(child, this.transform);
 
-        shipGameObject.transform.localPosition = localPosition;
+        childObject.transform.localRotation.eulerAngles.Set(90, 0, 0);
+        childObject.transform.localPosition = localPosition;
     }
     public void SpawnChildWithGlobalPosition(GameObject child, Vector3 globalPosition)
     {
-        GameObject shipGameObject = GameObject.Instantiate(child, this.transform);
+        GameObject childObject = GameObject.Instantiate(child, this.transform);
 
         Vector3 localPosition = transform.InverseTransformPoint(globalPosition);
 
-        shipGameObject.transform.localPosition = localPosition;
+        childObject.transform.localRotation.eulerAngles.Set(0, 0, 0);
+        childObject.transform.localPosition = localPosition;
     }
 }

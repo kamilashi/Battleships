@@ -15,16 +15,16 @@ public class ShipObject : MonoBehaviour, IVisualSpawner
 
     public void SpawnChild(GameObject child, Vector3 localPosition)
     {
-        GameObject shipGameObject = GameObject.Instantiate(child, this.transform);
+        GameObject childObject = GameObject.Instantiate(child, this.transform);
 
-        shipGameObject.transform.localPosition = localPosition;
+        childObject.transform.localPosition = localPosition;
     }
     public void SpawnChildWithGlobalPosition(GameObject child, Vector3 globalPosition)
     {
-        GameObject shipGameObject = GameObject.Instantiate(child, this.transform);
+        GameObject childObject = GameObject.Instantiate(child, this.transform);
 
         Vector3 localPosition = transform.InverseTransformPoint(globalPosition);
 
-        shipGameObject.transform.localPosition = localPosition;
+        childObject.transform.localPosition = localPosition;
     }
 }
