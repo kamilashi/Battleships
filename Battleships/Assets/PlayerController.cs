@@ -119,7 +119,6 @@ public class PlayerController : NetworkBehaviour
                         Debug.Log("You need to place all ships to progress!");
                         return;
                     }*/
-
                     break;
                 }
             case GamePhase.Combat:

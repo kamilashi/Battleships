@@ -129,7 +129,6 @@ public class GameManager : NetworkBehaviour
 
     private void TryHitShip(int x, int y, PlayerController attackerPlayer, PlayerController targetPlayer)
     {
-        //targetPlayer.UnpackSyncedGameState();
         LocalGameState targetGameState = targetPlayer.GetLocalGameState();
         
         HitResult hitResult = HitResult.None;
@@ -161,7 +160,7 @@ public class GameManager : NetworkBehaviour
             Debug.Log("Missed!");
         }
 
-       // targetPlayer.PackSyncedGameState(); 
+        attackedCell.wasHitOnce = true;
 
         CellHitData selfHitData = new CellHitData(hitResult, shipIndex, x, y, false);
         attackerPlayer.RpcOnCellHit(attackerPlayer.connectionToClient, selfHitData);
