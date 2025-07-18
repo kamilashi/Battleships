@@ -104,25 +104,28 @@ public class BattleFieldView : MonoBehaviour
 
    public void VisualizeCellHit(CellHitData hitData)
     {
-        if(hitData.sourceIsOpponent)
+        LocalGameState localGameState = localPlayerController.GetLocalGameState();
+        if (hitData.sourceIsOpponent)
         {
-            LocalGameState localGameState = localPlayerController.GetLocalGameState();
             ShipObject damagedShip = shipObjects[hitData.shipInstanceIndex];
-            //CellObject cellObject = cellObjects[localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1])];
-            //CellData cellData = cellObject.cellData;
 
             int flatIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
             damagedShip.HighlightShipSegment(flatIndex);
         }
         else
         {
-            ShipObject damagedShip = shipObjects[hitData.shipInstanceIndex];
-            BattleCell cell = localPlayerController.GetLocalGameState().battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
+            BattleCell cell = localGameState.battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
 
             Vector3 position = cell.getBottomLeftOrigin();
-            position.y += damagedShip.objectHeight;
 
-            damagedShip.SpawnChildWithGlobalPosition(damagedCellMarkerPrefab, position);
+            if(!cell.IsFree())
+            {
+                ShipObject occupiedObject = shipObjects[cell.shipData.instanceId];
+                position.y += occupiedObject.objectHeight;
+            }
+
+            int cellObjectIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
+            cellObjects[cellObjectIndex].SpawnChildWithGlobalPosition(damagedCellMarkerPrefab, position);
         }
     }
     public void VisualizeCellKill(CellHitData hitData)
@@ -222,8 +225,13 @@ public class BattleFieldView : MonoBehaviour
 
     public void TestHightlight(int x, int y)
     {
+        List<CellHitData> hitQueue = localPlayerController.hitQueue;
+
         int flatIndex = localPlayerController.GetLocalGameState().battleField.GetFlatCellIndex(x, y);
         CellHitData hitData = new CellHitData(testHitResult, 0, x, y, testSourceIsOpponent);
-        VisualizeCellHit(hitData);
+
+        hitQueue.Add(hitData);
+
+        ProcessCellHits();
     }
 }

@@ -151,10 +151,10 @@ public class GameManager : NetworkBehaviour
                 Debug.Log("Damaged ship");
             }
 
-            targetGameState.battleField.ClearCell(x, y);
-
             CellHitData otherHitData = new CellHitData(HitResult.Damaged, shipIndex, x, y, true);
             targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, otherHitData);
+
+            targetGameState.battleField.ClearCell(x, y);
         }
         else
         {

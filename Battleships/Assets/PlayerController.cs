@@ -229,7 +229,7 @@ public class PlayerController : NetworkBehaviour
     [TargetRpc]
     public void RpcOnCellHit(NetworkConnectionToClient conn, CellHitData cellHitData)
     {
-        if(isLocalPlayer)
+        //if(isLocalPlayer)
         {
             AddHit(cellHitData);
         }

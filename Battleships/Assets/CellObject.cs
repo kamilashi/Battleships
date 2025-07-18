@@ -57,7 +57,6 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
     {
         GameObject childObject = GameObject.Instantiate(child, this.transform);
 
-        childObject.transform.rotation.eulerAngles.Set(0, 0, 0);
         childObject.transform.localPosition = localPosition;
     }
     public void SpawnChildWithGlobalPosition(GameObject child, Vector3 globalPosition)
@@ -66,7 +65,6 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
 
         Vector3 localPosition = transform.InverseTransformPoint(globalPosition);
 
-        childObject.transform.rotation.eulerAngles.Set(0, 0, 0);
         childObject.transform.localPosition = localPosition;
     }
 }
