@@ -35,6 +35,7 @@ public class UIController : MonoBehaviour
         PlayerState.onShipAdded.AddListener(UpdateShipButtons);
         PlayerState.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
         PlayerState.onMessageLogged.AddListener(OnLogMessage);
+        PlayerState.onGamePhaseChanged.AddListener(OnGamePhaseChanged);
         submitButton.onClick.AddListener(OnSubmitButtonClicked);
         messagePanelMaxHeight = messageContainerTransform.rect.height;
         ResetMessagePanel();
@@ -91,14 +92,14 @@ public class UIController : MonoBehaviour
         {
             case GamePhase.Build:
                 {
-                    gamePhaseText.text = "Build Your Ships";
+                    gamePhaseText.text = "Build";
                     hintText.text = "Toggle orientation:\r\n\r\nR / middle m. b.\r\n\r\n";
                     hintText.text += "Submit to end turn.\r\n\r\n";
                 }
                 break;
             case GamePhase.Combat:
                 {
-                    gamePhaseText.text = "Combat";
+                    gamePhaseText.text = "Fight";
                     hintText.text = "Submit to end turn.\r\n\r\n";
                 }
                 break;

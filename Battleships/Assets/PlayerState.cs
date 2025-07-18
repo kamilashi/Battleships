@@ -22,6 +22,7 @@ public struct SyncedGameState
     public bool submitSignalReceived;
 
     public GamePhase gamePhase;
+    public GameOverState gameOverState;
 }
 
 public class PlayerState : NetworkBehaviour
@@ -127,7 +128,7 @@ public class PlayerState : NetworkBehaviour
         {
             case GamePhase.Build:
                 {
-                    /*if (gameState.shipManager.availableShipCounts.Exists(x => x > 0))
+                    /*if (gameState.shipManager.HasAvailableShipsRemaining())
                     {
                         Debug.Log("You need to place all ships to progress!");
                         return;

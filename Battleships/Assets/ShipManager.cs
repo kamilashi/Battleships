@@ -227,4 +227,13 @@ public class ShipManager
         return shipDatas[(int)type];
     }
 
+    public bool HasAvailableShipsRemaining()
+    {
+        return availableShipCounts.Exists(x => x > 0);
+    }
+
+    public bool HasShipsRemaining()
+    {
+        return totalShipCount > 0;
+    }
 }

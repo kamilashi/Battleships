@@ -9,7 +9,15 @@ using UnityEngine.Events;
 public enum GamePhase
 {
     Build,
-    Combat
+    Combat,
+    GameOver
+}
+public enum GameOverState
+{
+    None,
+    Win,
+    Lose,
+    Tie
 }
 public enum PlayerCommandType
 {
@@ -72,17 +80,19 @@ public class GameManager : NetworkBehaviour
         {
             GamePhase oldGamePhase = currentGamePhase;
 
+            if (currentGamePhase == GamePhase.Build)
+            {
+                currentGamePhase = GamePhase.Combat;
+            }
+
             foreach (PlayerState playerState in players)
             {
                 playerState.DeserializeGameState();
             }
 
-            ProcessTurn(players[0], players[1]); 
+            ProcessTurn(players[0], players[1]);
 
-            if(currentGamePhase == GamePhase.Build)
-            {
-                currentGamePhase = GamePhase.Combat;
-            }
+            ProcessGameOver(ref currentGamePhase, players[0], players[1]);
 
             currentTurnCount++;
 
@@ -102,12 +112,6 @@ public class GameManager : NetworkBehaviour
             }
         }
     }
-
-/*
-    private void LogSubmissionSignal(int playerId)
-    {
-        playerControllers[playerId].syncedState.submitSignalReceived = true;
-    }*/
 
     private void RegisterPlayer(PlayerState player)
     {
@@ -194,6 +198,35 @@ public class GameManager : NetworkBehaviour
         attackerPlayer.RpcOnCellHit(attackerPlayer.connectionToClient, selfHitData);
     }
 
+    private bool HasLosingCondition(PlayerState player)
+    {
+        LocalGameState localState = player.GetLocalGameState();
+        return !localState.shipManager.HasShipsRemaining();
+    }
+    private void ProcessGameOver(ref GamePhase newGamePhase, PlayerState player1, PlayerState player2)
+    {
+        bool player1Lost = HasLosingCondition(player1);
+        bool player2Lost = HasLosingCondition(player2);
+
+        if (!player1Lost && !player2Lost) 
+        {
+            return;
+        }
+
+        newGamePhase = GamePhase.GameOver;
+
+        if (player1Lost && player2Lost) 
+        {
+            player1.syncedState.gameOverState = GameOverState.Tie;
+            player2.syncedState.gameOverState = GameOverState.Tie;
+        }
+        else
+        {
+            player1.syncedState.gameOverState = player1Lost ? GameOverState.Lose : GameOverState.Win;
+            player2.syncedState.gameOverState = player2Lost ? GameOverState.Lose : GameOverState.Win;
+        }
+    }
+
     public void ProcessTurn(PlayerState player1, PlayerState player2)
     {
         foreach (PlayerCommand command in player1.syncedState.commands)
@@ -209,7 +242,8 @@ public class GameManager : NetworkBehaviour
         }
 
         player2.syncedState.commands.Clear();
-        // checkForWinner(player1, player2);
+        
+
     }
 
     public void ProcessCommand(PlayerCommand command, PlayerState owner, PlayerState opponent)
