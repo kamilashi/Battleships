@@ -18,6 +18,8 @@ public class BattleCell
         bottomLeftOrigin[1] = origin.y;
         bottomLeftOrigin[2] = origin.z;
 
+        wasHitOnce = false;
+
         Reset();
     }
     public void Initialize(float[] origin)
@@ -26,6 +28,8 @@ public class BattleCell
         bottomLeftOrigin[0] = origin[0];
         bottomLeftOrigin[1] = origin[1];
         bottomLeftOrigin[2] = origin[2];
+
+        wasHitOnce = false;
 
         Reset();
     }

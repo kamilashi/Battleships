@@ -4,9 +4,17 @@ using System.Collections.Generic;
 using UnityEditor;
 using UnityEngine;
 
+[Serializable]
 public struct CellData
 {
     public Vector2Int index;
+
+    public CellData(int x, int y)
+    {
+        index = new Vector2Int(x, y);
+        index.x = x; 
+        index.y = y;
+    }
 }
 
 public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
@@ -49,7 +57,7 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
     {
         GameObject childObject = GameObject.Instantiate(child, this.transform);
 
-        childObject.transform.localRotation.eulerAngles.Set(90, 0, 0);
+        childObject.transform.rotation.eulerAngles.Set(0, 0, 0);
         childObject.transform.localPosition = localPosition;
     }
     public void SpawnChildWithGlobalPosition(GameObject child, Vector3 globalPosition)
@@ -58,7 +66,7 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
 
         Vector3 localPosition = transform.InverseTransformPoint(globalPosition);
 
-        childObject.transform.localRotation.eulerAngles.Set(0, 0, 0);
+        childObject.transform.rotation.eulerAngles.Set(0, 0, 0);
         childObject.transform.localPosition = localPosition;
     }
 }

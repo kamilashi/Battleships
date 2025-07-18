@@ -27,6 +27,29 @@ public enum HitResult
     Killed
 }
 
+/*
+[Serializable]
+public abstract struct ShipData
+{
+    public ShipType type;
+    public int Index()
+    {
+        return (int)type;
+    }
+    public int Size()
+    {
+        return (int)type + 1;
+    }
+    public int MaxHealth()
+    {
+        return (int)type + 1;
+    }
+    static public Vector2Int GetOrientation(Orientation orientation) // #TODO: move out of here
+    {
+        return orientation == Orientation.Vertical ? new Vector2Int(0, 1) : new Vector2Int(1, 0);
+    }
+}*/
+
 [Serializable]
 public class RuntimeShipData
 {
@@ -50,37 +73,48 @@ public class RuntimeShipData
     {
         return (int)type;
     }
+    public int Size()
+    {
+        return (int)type + 1;
+    }
+    public int MaxHealth()
+    {
+        return (int)type + 1;
+    }
+    static public Vector2Int GetOrientation(Orientation orientation) // #TODO: move out of here
+    {
+        return orientation == Orientation.Vertical ? new Vector2Int(0, 1) : new Vector2Int(1, 0);
+    }
 }
 
 public struct StaticShipData
 {
     // static data:
-    public ShipType shipType;
+    public ShipType type;
     public GameObject shipPrefab;
     public int maxShipCount;
 
     public void Initialize(ShipType type, GameObject prefab, int maxCount)
     {
-        shipType = type;
+        this.type = type;
         shipPrefab = prefab; 
         maxShipCount = maxCount;
     }
-
     public int Index()
     {
-        return (int) shipType;
+        return (int)type;
     }
     public int Size()
     {
-        return (int) shipType + 1;
+        return (int)type + 1;
     }
     public int MaxHealth()
     {
-        return (int)shipType + 1;
+        return (int)type + 1;
     }
     static public Vector2Int GetOrientation(Orientation orientation) // #TODO: move out of here
-    { 
-        return orientation == Orientation.Vertical ? new Vector2Int(0,1) : new Vector2Int(1, 0);
+    {
+        return orientation == Orientation.Vertical ? new Vector2Int(0, 1) : new Vector2Int(1, 0);
     }
 }
 

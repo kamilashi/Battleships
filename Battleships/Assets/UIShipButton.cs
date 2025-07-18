@@ -19,8 +19,8 @@ public class UIShipButton : MonoBehaviour
     public void Initialize(UIController uIController, StaticShipData shipData)
     {
         this.uIController = uIController;
-        this.shipType = shipData.shipType;
-        buttonNameText.text = shipData.shipType.ToString();
+        this.shipType = shipData.type;
+        buttonNameText.text = shipData.type.ToString();
         shipCountText.text = shipData.maxShipCount.ToString();
 
         button.onClick.AddListener(OnButtonClick);

@@ -27,6 +27,9 @@ public class WorldObjectSelectSystem : MonoBehaviour
     public LayerMask cellLayer;
     public Camera mainCamera;
 
+    /*[Header("Auto Setup")]
+    public PlayerController localPlayerController;*/
+
     [Header("Debug View")]
     public Selectables hoverMode;
     public LayerMask clickableLayerMask;
@@ -36,6 +39,9 @@ public class WorldObjectSelectSystem : MonoBehaviour
 
     public int cellLayerIdx;
 
+    [Header("Debug")]
+    public bool highlightOnClick;
+
     private void Awake()
     { 
         cellLayerIdx = GetSingleLayerIndex(cellLayer);
@@ -44,7 +50,18 @@ public class WorldObjectSelectSystem : MonoBehaviour
         (1 << cellLayerIdx);
 
         clickableLayerMask = combinedMask;
+
+        //PlayerController.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
     }
+
+/*
+    public void OnLocalPlayerInitialized(PlayerController localPlayer)
+    {
+        if (localPlayer.isLocalPlayer)
+        {
+            localPlayerController = localPlayer;
+        }
+    }*/
 
     void Update()
     {
@@ -52,12 +69,17 @@ public class WorldObjectSelectSystem : MonoBehaviour
         ProcessSelection();
     }
 
-
     private void OnCellClick(GameObject interactiveGameObject)
     {
         CellObject interactiveObject = interactiveGameObject.GetComponent<CellObject>();
         interactiveObject.OnClicked();
+
+        if(highlightOnClick)
+        {
+            interactiveObject.battleFieldView.TestHightlight(interactiveObject.cellData.index.x, interactiveObject.cellData.index.y);
+        }
     }
+
     private void OnCellHover(GameObject interactiveGameObject)
     {
         CellObject interactiveObject = interactiveGameObject.GetComponent<CellObject>();
