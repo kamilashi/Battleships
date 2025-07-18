@@ -59,11 +59,12 @@ public class RuntimeShipData : ShipData
 {
     public int health;
     public int instanceId;
-
-    public void Initialize(int maxHealth, ShipType type, int id)
+    public Orientation orientation;
+    public void Initialize(int maxHealth, ShipType type, Orientation orientation, int id)
     {
         health = maxHealth;
         this.type = type;
+        this.orientation = orientation;
         instanceId = id;
     }
 
@@ -161,7 +162,7 @@ public class ShipManager
         RuntimeShipData shipInstance = new RuntimeShipData();
         int shipInstanceIndex = shipInstances.Count;
 
-        shipInstance.Initialize(shipDatas[index].MaxHealth(), type, shipInstanceIndex);
+        shipInstance.Initialize(shipDatas[index].MaxHealth(), type, orientation, shipInstanceIndex);
         shipInstances.Add(shipInstance);
 
         return shipInstance; //#TODO: Return Runtime ref instead!

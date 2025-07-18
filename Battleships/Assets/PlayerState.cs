@@ -282,7 +282,7 @@ public class PlayerState : NetworkBehaviour
             if (!extCell.IsFree())
             {
                 cell.shipData = new RuntimeShipData();
-                cell.shipData.Initialize(extCell.shipData.health, extCell.shipData.type, extCell.shipData.instanceId);
+                cell.shipData.Initialize(extCell.shipData.health, extCell.shipData.type, extCell.shipData.orientation, extCell.shipData.instanceId);
             }
 
             syncedState.field[i] = cell;
@@ -296,7 +296,7 @@ public class PlayerState : NetworkBehaviour
             RuntimeShipData extShipData = localGameState.shipManager.shipInstances[i];
 
             RuntimeShipData shipData = new RuntimeShipData();
-            shipData.Initialize(extShipData.health, extShipData.type, extShipData.instanceId);
+            shipData.Initialize(extShipData.health, extShipData.type, extShipData.orientation, extShipData.instanceId);
 
             syncedState.shipInstances[i] = shipData;
         }
@@ -328,7 +328,7 @@ public class PlayerState : NetworkBehaviour
             if (!extCell.IsFree())
             {
                 cell.shipData = new RuntimeShipData();
-                cell.shipData.Initialize(extCell.shipData.health, extCell.shipData.type, extCell.shipData.instanceId);
+                cell.shipData.Initialize(extCell.shipData.health, extCell.shipData.type, extCell.shipData.orientation, extCell.shipData.instanceId);
             }
 
             localGameState.battleField.field[i] = cell;
@@ -342,7 +342,7 @@ public class PlayerState : NetworkBehaviour
             RuntimeShipData extShipData = syncedState.shipInstances[i];
 
             RuntimeShipData shipData = new RuntimeShipData();
-            shipData.Initialize(extShipData.health, extShipData.type, extShipData.instanceId);
+            shipData.Initialize(extShipData.health, extShipData.type, extShipData.orientation, extShipData.instanceId);
 
             localGameState.shipManager.shipInstances.Add(shipData);
         }

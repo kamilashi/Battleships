@@ -3,6 +3,7 @@ using Mirror;
 using System;
 using System.Collections;
 using System.Collections.Generic;
+using System.IO;
 using UnityEngine;
 using static UnityEngine.UI.Image;
 
@@ -10,7 +11,7 @@ using static UnityEngine.UI.Image;
 public class BattleCell
 {
     public float[] bottomLeftOrigin;
-    public RuntimeShipData shipData;
+    public RuntimeShipData shipData; //#TODO: replace with ship instance ID!
     public bool wasHitOnce;
     public void Initialize(Vector3 origin)
     {
@@ -175,10 +176,42 @@ public class BattleField
             int coordX = x + i * direction.x;
             int coordY = y + i * direction.y;
 
-            if(!IsInRange(coordX, coordY))
-            { break; }
+            if(IsInRange(coordX, coordY))
+            {
+                path.Add(new Vector2Int(coordX, coordY));
+            }
+        }
 
-            path.Add(new Vector2Int(coordX, coordY));
+        return path;
+    }
+
+    public List<Vector2Int> GetBlindAdjacentPathInRange(int x, int y, int length, Vector2Int direction)
+    {
+        List<Vector2Int> path = new List<Vector2Int>();
+        Vector2Int origin = new Vector2Int(x, y);
+        Vector2Int cellCoords = new Vector2Int(x, y);
+
+        cellCoords = origin - direction;
+
+        if (IsInRange(cellCoords.x, cellCoords.y))
+        {
+            path.Add(new Vector2Int(cellCoords.x, cellCoords.y));
+        }
+
+        Vector2Int localRight = Helpers.GetRightCWVector(direction);
+        cellCoords += localRight;
+
+        path.AddRange(GetBlindPathInRange(cellCoords.x, cellCoords.y, length + 2, direction));
+
+        cellCoords -= 2 * localRight;
+
+        path.AddRange(GetBlindPathInRange(cellCoords.x, cellCoords.y, length + 2, direction));
+
+        cellCoords = origin + length * direction;
+
+        if (IsInRange(cellCoords.x, cellCoords.y))
+        {
+            path.Add(new Vector2Int(cellCoords.x, cellCoords.y));
         }
 
         return path;

@@ -157,7 +157,7 @@ public class GameManager : NetworkBehaviour
                 Debug.Log("Damaged ship");
             }
 
-            CellHitData otherHitData = new CellHitData(HitResult.Damaged, shipIndex, x, y, true);
+            CellHitData otherHitData = new CellHitData(HitResult.Damaged, shipIndex, x, y, true, attackedCell.shipData.Size(), attackedCell.shipData.orientation);
             targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, otherHitData);
 
             targetGameState.battleField.ClearCell(x, y);
@@ -169,7 +169,7 @@ public class GameManager : NetworkBehaviour
 
         attackedCell.wasHitOnce = true;
 
-        CellHitData selfHitData = new CellHitData(hitResult, shipIndex, x, y, false);
+        CellHitData selfHitData = new CellHitData(hitResult, -1, x, y, false);
         attackerPlayer.RpcOnCellHit(attackerPlayer.connectionToClient, selfHitData);
     }
 
