@@ -138,7 +138,6 @@ public class PlayerState : NetworkBehaviour
                 {
                     if (!HasHitInputStored())
                     {
-                        //Debug.Log("You need to select a cell to hit!");
                         onMessageLogged?.Invoke("You need to select a cell to hit!");
                         return;
                     }
@@ -157,14 +156,13 @@ public class PlayerState : NetworkBehaviour
     }
     public void TryStoreHitInput(int x, int y)
     {
-        if(!localGameState.battleField.GetCell(x, y).wasHitOnce)
+        if(!localGameState.battleField.WasCellHitOnce(x, y))
         {
             syncedState.hitCoords[0] = x;
             syncedState.hitCoords[1] = y;
         }
         else
         {
-            //Debug.Log("You cannot hit the same cell twice!");
             onMessageLogged?.Invoke("You cannot hit the same cell twice!");
         }
     }
@@ -282,7 +280,7 @@ public class PlayerState : NetworkBehaviour
             if (!extCell.IsFree())
             {
                 cell.shipData = new RuntimeShipData();
-                cell.shipData.Initialize(extCell.shipData.health, extCell.shipData.type, extCell.shipData.orientation, extCell.shipData.instanceId);
+                cell.shipData.Initialize(extCell.shipData);
             }
 
             syncedState.field[i] = cell;
@@ -296,7 +294,7 @@ public class PlayerState : NetworkBehaviour
             RuntimeShipData extShipData = localGameState.shipManager.shipInstances[i];
 
             RuntimeShipData shipData = new RuntimeShipData();
-            shipData.Initialize(extShipData.health, extShipData.type, extShipData.orientation, extShipData.instanceId);
+            shipData.Initialize(extShipData);
 
             syncedState.shipInstances[i] = shipData;
         }
@@ -328,7 +326,7 @@ public class PlayerState : NetworkBehaviour
             if (!extCell.IsFree())
             {
                 cell.shipData = new RuntimeShipData();
-                cell.shipData.Initialize(extCell.shipData.health, extCell.shipData.type, extCell.shipData.orientation, extCell.shipData.instanceId);
+                cell.shipData.Initialize(extCell.shipData);
             }
 
             localGameState.battleField.field[i] = cell;
@@ -342,7 +340,7 @@ public class PlayerState : NetworkBehaviour
             RuntimeShipData extShipData = syncedState.shipInstances[i];
 
             RuntimeShipData shipData = new RuntimeShipData();
-            shipData.Initialize(extShipData.health, extShipData.type, extShipData.orientation, extShipData.instanceId);
+            shipData.Initialize(extShipData);
 
             localGameState.shipManager.shipInstances.Add(shipData);
         }

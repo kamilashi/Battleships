@@ -137,8 +137,9 @@ public class GameManager : NetworkBehaviour
     private void TryHitShip(int x, int y, PlayerState attackerPlayer, PlayerState targetPlayer)
     {
         LocalGameState targetGameState = targetPlayer.GetLocalGameState();
+        LocalGameState attackerGameState = attackerPlayer.GetLocalGameState();
         
-        HitResult hitResult = HitResult.None;
+        HitResult hitResult = HitResult.Miss;
         int shipIndex = -1;
 
         BattleCell attackedCell = targetGameState.battleField.GetCell( x, y);
@@ -147,27 +148,47 @@ public class GameManager : NetworkBehaviour
             shipIndex = attackedCell.shipData.instanceId;
             hitResult = targetGameState.shipManager.HitShip(shipIndex);
 
-            if(hitResult == HitResult.Killed)
+            if (hitResult == HitResult.Undefined)
+            {
+                return;
+            }
+
+            if (hitResult == HitResult.Killed)
             {
                 targetPlayer.RpcOnShipDestroyed(targetPlayer.connectionToClient, shipIndex);
                 Debug.Log("Killed ship");
+
+                RuntimeShipData hitShip = attackedCell.shipData;
+
+                List<Vector2Int> surroundingCells = attackerGameState.battleField.GetBlindAdjacentPathInRange(hitShip.origin[0], hitShip.origin[1], hitShip.Size(), ShipData.GetOrientation(hitShip.orientation));
+
+                foreach (Vector2Int cell in surroundingCells)
+                {
+                    if(!attackerGameState.battleField.WasCellHitOnce(cell.x, cell.y))
+                    {
+                        CellHitData surroundedHitData = new CellHitData(HitResult.Miss, -1, cell.x, cell.y, false);
+                        attackerPlayer.RpcOnCellHit(attackerPlayer.connectionToClient, surroundedHitData);
+
+                        attackerGameState.battleField.MarkCellHitOnce(cell.x, cell.y);
+                    }
+                }
             }
             else
             {
                 Debug.Log("Damaged ship");
             }
 
-            CellHitData otherHitData = new CellHitData(HitResult.Damaged, shipIndex, x, y, true, attackedCell.shipData.Size(), attackedCell.shipData.orientation);
-            targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, otherHitData);
-
             targetGameState.battleField.ClearCell(x, y);
+
+            CellHitData otherHitData = new CellHitData(HitResult.Damaged, shipIndex, x, y, true);
+            targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, otherHitData);
         }
         else
         {
             Debug.Log("Missed!");
         }
 
-        attackedCell.wasHitOnce = true;
+        attackerGameState.battleField.MarkCellHitOnce(x, y);
 
         CellHitData selfHitData = new CellHitData(hitResult, -1, x, y, false);
         attackerPlayer.RpcOnCellHit(attackerPlayer.connectionToClient, selfHitData);

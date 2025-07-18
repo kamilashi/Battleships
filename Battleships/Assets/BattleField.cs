@@ -295,7 +295,15 @@ public class BattleField
     }
     public BattleCell GetCell(int x, int y)
     {
-        return field[x * setup.vertiCellsCount + y];
+        return field[GetFlatCellIndex(x, y)];
+    }
+    public void MarkCellHitOnce(int x, int y)
+    {
+        GetCell(x, y).wasHitOnce = true;
+    }
+    public bool WasCellHitOnce(int x, int y)
+    {
+        return GetCell(x, y).wasHitOnce;
     }
     public int GetFlatCellIndex(int x, int y)
     {

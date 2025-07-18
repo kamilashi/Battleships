@@ -22,9 +22,10 @@ public enum Orientation
 }
 public enum HitResult
 {
-    None,
+    Miss,
     Damaged,
-    Killed
+    Killed,
+    Undefined
 }
 
 [Serializable]
@@ -60,18 +61,37 @@ public class RuntimeShipData : ShipData
     public int health;
     public int instanceId;
     public Orientation orientation;
-    public void Initialize(int maxHealth, ShipType type, Orientation orientation, int id)
+    public int[] origin;
+    public void Initialize(int maxHealth, ShipType type, Orientation orientation, int id, int x, int y)
     {
         health = maxHealth;
         this.type = type;
         this.orientation = orientation;
-        instanceId = id;
+        this.instanceId = id;
+        origin = new int[2] { x, y };
+    }
+
+    public void Initialize(RuntimeShipData shipData)
+    {
+        health = shipData.health;
+        this.type = shipData.type;
+        this.orientation = shipData.orientation;
+        this.instanceId = shipData.instanceId;
+        origin = new int[2] { shipData.origin[0], shipData.origin[1] };
     }
 
     public int Damage()
     {
         health -= 1;
         return health;
+    }
+
+    public Vector2Int GetOrigin()
+    {
+        Vector2Int origin = new Vector2Int();
+        origin.x = origin[0];
+        origin.y = origin[1];
+        return origin;
     }
 }
 
@@ -162,7 +182,7 @@ public class ShipManager
         RuntimeShipData shipInstance = new RuntimeShipData();
         int shipInstanceIndex = shipInstances.Count;
 
-        shipInstance.Initialize(shipDatas[index].MaxHealth(), type, orientation, shipInstanceIndex);
+        shipInstance.Initialize(shipDatas[index].MaxHealth(), type, orientation, shipInstanceIndex, x, y);
         shipInstances.Add(shipInstance);
 
         return shipInstance; //#TODO: Return Runtime ref instead!
@@ -179,6 +199,12 @@ public class ShipManager
 
     public HitResult HitShip(int shipInstanceIndex)
     {
+        if(shipInstanceIndex >= shipInstances.Count)
+        {
+            Debug.Log("Ship instance index was out of range! " + shipInstanceIndex);
+            return HitResult.Undefined;
+        }
+
         int newHealth = shipInstances[shipInstanceIndex].Damage();
 
         if (newHealth <= 0)

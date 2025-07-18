@@ -17,11 +17,12 @@ public struct CellHitData
 {
     public int[] hitCellCoords;
     public HitResult hitResult;
-    public int shipInstanceIndex;
+    public int ownShipInstanceIndex;
     public bool sourceIsOpponent;
 
+    /*
     public int killedShipSize;
-    public Orientation killedShipOrientation;
+    public Orientation killedShipOrientation;*/
 
     public CellHitData(HitResult result,
         int shipId, 
@@ -35,10 +36,12 @@ public struct CellHitData
         hitCellCoords = new int[2];
         hitCellCoords[0] = coordX;
         hitCellCoords[1] = coordY;
-        shipInstanceIndex = shipId;
+        ownShipInstanceIndex = shipId;
         this.sourceIsOpponent = sourceIsOpponent;
+        
+        /*
         killedShipSize = killedSize;
-        killedShipOrientation = killedOrientation;
+        killedShipOrientation = killedOrientation;*/
     }
 }
 
@@ -135,7 +138,7 @@ public class BattleFieldView : MonoBehaviour
         if (hitData.sourceIsOpponent)
         {
             LocalGameState localGameState = localPlayerState.GetLocalGameState();
-            ShipObject damagedShip = shipObjects[hitData.shipInstanceIndex];
+            ShipObject damagedShip = shipObjects[hitData.ownShipInstanceIndex];
 
             int flatIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
             damagedShip.HighlightShipSegment(flatIndex);
@@ -151,7 +154,7 @@ public class BattleFieldView : MonoBehaviour
         LocalGameState localGameState = localPlayerState.GetLocalGameState();
         if (hitData.sourceIsOpponent)
         {
-            ShipObject damagedShip = shipObjects[hitData.shipInstanceIndex];
+            ShipObject damagedShip = shipObjects[hitData.ownShipInstanceIndex];
 
             int flatIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
             damagedShip.HighlightShipSegment(flatIndex);
@@ -160,24 +163,18 @@ public class BattleFieldView : MonoBehaviour
         {
             VisualizeOpponentCellInfo(hitData.hitCellCoords[0], hitData.hitCellCoords[1], damagedCellMarkerPrefab);
 
-            List<Vector2Int> surroundingCells = localGameState.battleField.GetBlindAdjacentPathInRange(hitData.hitCellCoords[0], hitData.hitCellCoords[1], hitData.killedShipSize, ShipData.GetOrientation(hitData.killedShipOrientation));
+            /*List<Vector2Int> surroundingCells = localGameState.battleField.GetBlindAdjacentPathInRange(hitData.hitCellCoords[0], hitData.hitCellCoords[1], hitData.killedShipSize, ShipData.GetOrientation(hitData.killedShipOrientation));
 
             foreach (Vector2Int cell in surroundingCells)
             {
                 VisualizeOpponentCellInfo(cell.x, cell.y, missedCellMarkerPrefab);
-            }
+            }*/
         }
     }
 
     public void VisualizeCellMiss(CellHitData hitData)
     {
-        LocalGameState localGameState = localPlayerState.GetLocalGameState();
-        BattleCell cell = localGameState.battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
-
-        Vector3 position = cell.getBottomLeftOrigin();
-
-        int cellObjectIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
-        cellObjects[cellObjectIndex].SpawnChildWithGlobalPosition(missedCellMarkerPrefab, position);
+        VisualizeOpponentCellInfo(hitData.hitCellCoords[0], hitData.hitCellCoords[1], missedCellMarkerPrefab);
     }
 
     public void OnShipAdded(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
@@ -237,8 +234,10 @@ public class BattleFieldView : MonoBehaviour
                 case HitResult.Killed:
                     VisualizeCellKill(hitData);
                     break;
-                case HitResult.None:
+                case HitResult.Miss:
                     VisualizeCellMiss(hitData);
+                    break;
+                case HitResult.Undefined:
                     break;
             }
         }
