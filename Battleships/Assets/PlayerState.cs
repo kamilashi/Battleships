@@ -38,6 +38,7 @@ public class PlayerState : NetworkBehaviour
     public static UnityEvent<PlayerState, Vector2Int, RuntimeShipData, Orientation> onShipAdded = new UnityEvent<PlayerState, Vector2Int, RuntimeShipData, Orientation>();
     public static UnityEvent<PlayerState, int> onShipDestroyed = new UnityEvent<PlayerState, int>();
     public static UnityEvent<Orientation, Orientation> onOrientationToggled = new UnityEvent<Orientation, Orientation>();
+    public static UnityEvent<GamePhase, GamePhase> onGamePhaseChanged = new UnityEvent<GamePhase, GamePhase>();
 
     private LocalGameState localGameState;
 
@@ -223,6 +224,11 @@ public class PlayerState : NetworkBehaviour
     public void RpcInitializeClient(NetworkConnectionToClient conn)
     {
         Initialize();
+    }
+    [TargetRpc]
+    public void RpcOnGamePhaseChanged(NetworkConnectionToClient conn, GamePhase oldPhase, GamePhase newPhase)
+    {
+        PlayerState.onGamePhaseChanged?.Invoke(oldPhase, newPhase);
     }
 
     [TargetRpc]

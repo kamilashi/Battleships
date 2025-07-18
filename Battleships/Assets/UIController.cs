@@ -9,6 +9,8 @@ public class UIController : MonoBehaviour
     public GameObject shipButtonPrefab;
     public RectTransform shipButtonParent;
     public Button submitButton;
+    public TMPro.TMP_Text gamePhaseText;
+    public TMPro.TMP_Text hintText;
 
     [Header("Debug View")]
     public PlayerState localPlayerState;
@@ -41,6 +43,8 @@ public class UIController : MonoBehaviour
             shipButtons.Add(buttonObj);
             buttonObj.Initialize(this, shipDatas[i]);
         }
+
+        OnGamePhaseChanged(GamePhase.Build, GamePhase.Build);
     }
 
     public void UpdateShipButtons(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
@@ -64,4 +68,23 @@ public class UIController : MonoBehaviour
         localPlayerState.OnSubmitSignalReceived();
     }
 
+    public void OnGamePhaseChanged(GamePhase oldPhase, GamePhase newPhase)
+    {
+        switch(newPhase)
+        {
+            case GamePhase.Build:
+                {
+                    gamePhaseText.text = "Build Your Ships";
+                    hintText.text = "Toggle orientation:\r\n\r\nR / middle m. b.\r\n\r\n";
+                    hintText.text += "Submit to end turn.\r\n\r\n";
+                }
+                break;
+            case GamePhase.Combat:
+                {
+                    gamePhaseText.text = "Combat";
+                    hintText.text = "Submit to end turn.\r\n\r\n";
+                }
+                break;
+        }
+    }
 }

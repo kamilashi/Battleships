@@ -70,6 +70,8 @@ public class GameManager : NetworkBehaviour
 
         if (players[0].syncedState.submitSignalReceived && players[1].syncedState.submitSignalReceived) 
         {
+            GamePhase oldGamePhase = currentGamePhase;
+
             foreach (PlayerState playerState in players)
             {
                 playerState.DeserializeGameState();
@@ -92,6 +94,11 @@ public class GameManager : NetworkBehaviour
 
                 playerState.RpcSyncGameStateWClient(playerState.connectionToClient, playerState.syncedState);
                 playerState.RpcOnTurnFinished(playerState.connectionToClient);
+
+                if(oldGamePhase != currentGamePhase)
+                {
+                    playerState.RpcOnGamePhaseChanged(playerState.connectionToClient, oldGamePhase, currentGamePhase);
+                }
             }
         }
     }
