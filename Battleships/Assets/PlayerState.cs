@@ -39,6 +39,7 @@ public class PlayerState : NetworkBehaviour
     public static UnityEvent<PlayerState, int> onShipDestroyed = new UnityEvent<PlayerState, int>();
     public static UnityEvent<Orientation, Orientation> onOrientationToggled = new UnityEvent<Orientation, Orientation>();
     public static UnityEvent<GamePhase, GamePhase> onGamePhaseChanged = new UnityEvent<GamePhase, GamePhase>();
+    public static UnityEvent<string> onMessageLogged = new UnityEvent<string>();
 
     private LocalGameState localGameState;
 
@@ -82,14 +83,16 @@ public class PlayerState : NetworkBehaviour
         Orientation selectedOrientation = selectedShipOrientation;
         if (type == ShipType.Count)
         {
-            Debug.Log("Choose a ship to place first.");
+            //Debug.Log("Choose a ship to place first.");
+            onMessageLogged?.Invoke("Choose a ship to place first");
             return;
         }
 
         StaticShipData shipData = localGameState.shipManager.GetShipData(type);
         if (!localGameState.battleField.CanPlaceShip(x, y, shipData, selectedOrientation))
         {
-            Debug.Log("Cannot place ship here.");
+            //Debug.Log("Cannot place ship here.");
+            onMessageLogged?.Invoke("Cannot place ship here");
             return;
         }
 
@@ -135,7 +138,8 @@ public class PlayerState : NetworkBehaviour
                 {
                     if (!HasHitInputStored())
                     {
-                        Debug.Log("You need to select a cell to hit!");
+                        //Debug.Log("You need to select a cell to hit!");
+                        onMessageLogged?.Invoke("You need to select a cell to hit!");
                         return;
                     }
 
@@ -160,7 +164,8 @@ public class PlayerState : NetworkBehaviour
         }
         else
         {
-            Debug.Log("You cannot hit the same cell twice!");
+            //Debug.Log("You cannot hit the same cell twice!");
+            onMessageLogged?.Invoke("You cannot hit the same cell twice!");
         }
     }
     public void ClearHitInput()

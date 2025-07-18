@@ -1,3 +1,4 @@
+using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
@@ -12,15 +13,31 @@ public class UIController : MonoBehaviour
     public TMPro.TMP_Text gamePhaseText;
     public TMPro.TMP_Text hintText;
 
+    public RectTransform messageContainerTransform;
+    public TMPro.TMP_Text messageText;
+    public float messageStayDuration;
+    public float messageAnimateSpeed;
+
+
+    [Header("Auto Setup")]
+    public float messagePanelMaxHeight;
+
     [Header("Debug View")]
     public PlayerState localPlayerState;
     public List<UIShipButton> shipButtons;
+    public Coroutine messageLogCoroutine;
+
+
+    public float debugProgress;
 
     void Awake()
     {
         PlayerState.onShipAdded.AddListener(UpdateShipButtons);
         PlayerState.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
+        PlayerState.onMessageLogged.AddListener(OnLogMessage);
         submitButton.onClick.AddListener(OnSubmitButtonClicked);
+        messagePanelMaxHeight = messageContainerTransform.rect.height;
+        ResetMessagePanel();
     }
 
     void OnLocalPlayerInitialized(PlayerState placerState)
@@ -86,5 +103,93 @@ public class UIController : MonoBehaviour
                 }
                 break;
         }
+    }
+
+    private bool AnimateUp(float parameter, float endValue, Action<float> animation)
+    {
+        animation.Invoke(parameter);
+
+        if (parameter >= endValue) 
+        {
+            return true;
+        }
+
+        return false;
+    }
+    private bool AnimateDown(float parameter, float endValue, Action<float> animation)
+    {
+        animation.Invoke(parameter);
+
+        if (parameter <= endValue)
+        {
+            return true;
+        }
+
+        return false;
+    }
+
+    private void EditMessageHeight(float heightMultiplier)
+    {
+        Vector2 currentSize = messageContainerTransform.sizeDelta;
+        messageContainerTransform.sizeDelta = new Vector2(currentSize.x, messagePanelMaxHeight * heightMultiplier);
+
+        if(messageContainerTransform.rect.height < messageText.preferredHeight)
+        {
+            messageText.enabled = false;
+        }
+        else
+        {
+            messageText.enabled = true;
+        }
+    }
+
+    private void OnLogMessage(string message)
+    {
+        if(messageLogCoroutine != null)
+        {
+            StopCoroutine(messageLogCoroutine);
+            messageLogCoroutine = null;
+        }
+
+        ResetMessagePanel();
+
+        messageText.text = message;
+        messageLogCoroutine = StartCoroutine(LogMessageCoroutine());
+    }
+
+    private IEnumerator LogMessageCoroutine()
+    {
+        float progress = 0.0f;
+
+        while (!AnimateUp(progress, 1.0f, EditMessageHeight))
+        {
+            progress += messageAnimateSpeed * Time.deltaTime;
+            debugProgress = progress;
+            yield return null;
+        }
+
+        float time = 0.0f;
+        while (time <= messageStayDuration)
+        {
+            time += Time.deltaTime;
+            yield return null;
+        }
+
+        while (!AnimateDown(progress, 0.0f, EditMessageHeight))
+        {
+            progress -= messageAnimateSpeed * Time.deltaTime;
+            debugProgress = progress;
+            yield return null;
+        }
+
+        ResetMessagePanel();
+
+        messageLogCoroutine = null;
+    }
+
+    private void ResetMessagePanel()
+    {
+        EditMessageHeight(0.0f);
+        messageText.enabled = false;
     }
 }

@@ -172,7 +172,7 @@ public class BattleFieldView : MonoBehaviour
 
         if (orientation == Orientation.Horizontal)
         {
-            shipGameObject.transform.localRotation.eulerAngles.Set(0,90,0);
+            shipGameObject.transform.localEulerAngles = new Vector3(0, 90, 0);
         }
 
         int shipObjectIndex = shipObjects.Count;
