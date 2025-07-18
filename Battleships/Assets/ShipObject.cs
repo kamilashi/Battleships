@@ -31,7 +31,7 @@ public class ShipObject : MonoBehaviour, IVisualSpawner
 
         segmentDatas = new Dictionary<int, ShipObjectData>();
         Vector2Int direction = RuntimeShipData.GetOrientation(shipOrientation);
-        BattleField localBattleField = battleFieldView.localPlayerController.GetLocalGameState().battleField;
+        BattleField localBattleField = battleFieldView.localPlayerState.GetLocalGameState().battleField;
 
         Debug.Assert(segments.Count == shipData.Size());
 

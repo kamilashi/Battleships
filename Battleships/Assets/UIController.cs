@@ -11,29 +11,28 @@ public class UIController : MonoBehaviour
     public Button submitButton;
 
     [Header("Debug View")]
-    public PlayerController localPlayerController;
+    public PlayerState localPlayerState;
     public List<UIShipButton> shipButtons;
-
 
     void Awake()
     {
-        PlayerController.onShipAdded.AddListener(UpdateShipButtons);
-        PlayerController.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
+        PlayerState.onShipAdded.AddListener(UpdateShipButtons);
+        PlayerState.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
         submitButton.onClick.AddListener(OnSubmitButtonClicked);
     }
 
-    void OnLocalPlayerInitialized(PlayerController playerController)
+    void OnLocalPlayerInitialized(PlayerState placerState)
     {
-        if (playerController.isLocalPlayer)
+        if (placerState.isLocalPlayer)
         {
-            localPlayerController = playerController;
+            localPlayerState = placerState;
             Initialize();
         }
     }
 
     public void Initialize()
     {
-        List<StaticShipData> shipDatas = localPlayerController.GetShipDataList();
+        List<StaticShipData> shipDatas = localPlayerState.GetShipDataList();
 
         for( int i = 0; i < (int) ShipType.Count; i++)
         {
@@ -44,25 +43,25 @@ public class UIController : MonoBehaviour
         }
     }
 
-    public void UpdateShipButtons(PlayerController player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
+    public void UpdateShipButtons(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
     {
         if(player.isLocalPlayer)
         {
             for (int i = 0; i < (int)ShipType.Count; i++)
             {
                 UIShipButton buttonObj = shipButtons[i];
-                buttonObj.UpdateShipCount(localPlayerController.GetLocalGameState().shipManager.availableShipCounts[i]);
+                buttonObj.UpdateShipCount(localPlayerState.GetLocalGameState().shipManager.availableShipCounts[i]);
             }
         }
     }
 
     public void OnShipButtonClicked(ShipType type)
     {
-        localPlayerController.OnShipTypeSelected(type);
+        localPlayerState.OnShipTypeSelected(type);
     }
     public void OnSubmitButtonClicked()
     {
-        localPlayerController.OnSubmitSignalReceived();
+        localPlayerState.OnSubmitSignalReceived();
     }
 
 }

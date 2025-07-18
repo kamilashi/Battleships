@@ -50,32 +50,32 @@ public class GameManager : NetworkBehaviour
 
     [Header("Debug View")]
 
-    public List<PlayerController> playerControllers = new List<PlayerController>();
+    public List<PlayerState> players = new List<PlayerState>();
     [SerializeField] private GamePhase currentGamePhase;
     [SerializeField] private int currentTurnCount;
 
     void Awake()
     {
-        PlayerController.onPlayerSpawnedEvent.AddListener(RegisterPlayer);
-        PlayerController.onPlayerDespawnedEvent.AddListener(DeregisterPlayer);
+        PlayerState.onPlayerSpawnedEvent.AddListener(RegisterPlayer);
+        PlayerState.onPlayerDespawnedEvent.AddListener(DeregisterPlayer);
         currentTurnCount = 0;
     }
 
     void FixedUpdate()
     {
-        if(playerControllers.Count != intendedPlayerCount)
+        if(players.Count != intendedPlayerCount)
         {
             return;
         }
 
-        if (playerControllers[0].syncedState.submitSignalReceived && playerControllers[1].syncedState.submitSignalReceived) 
+        if (players[0].syncedState.submitSignalReceived && players[1].syncedState.submitSignalReceived) 
         {
-            foreach (PlayerController playerController in playerControllers)
+            foreach (PlayerState playerState in players)
             {
-                playerController.DeserializeGameState();
+                playerState.DeserializeGameState();
             }
 
-            ProcessTurn(playerControllers[0], playerControllers[1]); 
+            ProcessTurn(players[0], players[1]); 
 
             if(currentGamePhase == GamePhase.Build)
             {
@@ -84,14 +84,14 @@ public class GameManager : NetworkBehaviour
 
             currentTurnCount++;
 
-            foreach (PlayerController playerController in playerControllers)
+            foreach (PlayerState playerState in players)
             {
-                playerController.syncedState.submitSignalReceived = false;
-                playerController.syncedState.gamePhase = currentGamePhase;
-                playerController.SerializeGameState();
+                playerState.syncedState.submitSignalReceived = false;
+                playerState.syncedState.gamePhase = currentGamePhase;
+                playerState.SerializeGameState();
 
-                playerController.RpcSyncGameStateWClient(playerController.connectionToClient, playerController.syncedState);
-                playerController.RpcOnTurnFinished(playerController.connectionToClient);
+                playerState.RpcSyncGameStateWClient(playerState.connectionToClient, playerState.syncedState);
+                playerState.RpcOnTurnFinished(playerState.connectionToClient);
             }
         }
     }
@@ -102,15 +102,15 @@ public class GameManager : NetworkBehaviour
         playerControllers[playerId].syncedState.submitSignalReceived = true;
     }*/
 
-    private void RegisterPlayer(PlayerController player)
+    private void RegisterPlayer(PlayerState player)
     {
-        if(playerControllers.Count == intendedPlayerCount)
+        if(players.Count == intendedPlayerCount)
         {
             Debug.LogError("Maximum connected player count reached!");
             return;
         }
 
-        int playerIndex = playerControllers.Count;
+        int playerIndex = players.Count;
 
         if(!player.isLocalPlayer)
         {
@@ -120,14 +120,14 @@ public class GameManager : NetworkBehaviour
         player.RpcInitializeClient(player.connectionToClient);
 
         player.syncedState.playerId = playerIndex;
-        playerControllers.Add(player);
+        players.Add(player);
     }
-    private void DeregisterPlayer(PlayerController player)
+    private void DeregisterPlayer(PlayerState player)
     {
-        playerControllers.Remove(player);
+        players.Remove(player);
     }
 
-    private void TryHitShip(int x, int y, PlayerController attackerPlayer, PlayerController targetPlayer)
+    private void TryHitShip(int x, int y, PlayerState attackerPlayer, PlayerState targetPlayer)
     {
         LocalGameState targetGameState = targetPlayer.GetLocalGameState();
         
@@ -166,7 +166,7 @@ public class GameManager : NetworkBehaviour
         attackerPlayer.RpcOnCellHit(attackerPlayer.connectionToClient, selfHitData);
     }
 
-    public void ProcessTurn(PlayerController player1, PlayerController player2)
+    public void ProcessTurn(PlayerState player1, PlayerState player2)
     {
         foreach (PlayerCommand command in player1.syncedState.commands)
         {
@@ -184,7 +184,7 @@ public class GameManager : NetworkBehaviour
         // checkForWinner(player1, player2);
     }
 
-    public void ProcessCommand(PlayerCommand command, PlayerController owner, PlayerController opponent)
+    public void ProcessCommand(PlayerCommand command, PlayerState owner, PlayerState opponent)
     {
         switch (command.type)
         {

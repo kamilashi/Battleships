@@ -807,7 +807,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  playerControllers: []
+  players: []
   currentGamePhase: 0
   currentTurnCount: 0
 --- !u!114 &848502403
@@ -1151,6 +1151,7 @@ GameObject:
   - component: {fileID: 1359330469}
   - component: {fileID: 1359330467}
   - component: {fileID: 1359330466}
+  - component: {fileID: 1359330470}
   m_Layer: 0
   m_Name: Local
   m_TagString: Untagged
@@ -1174,6 +1175,7 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   mainCamera: {fileID: 963194227}
+  localPlayerState: {fileID: 0}
   hoverMode: 0
   clickableLayerMask:
     serializedVersion: 2
@@ -1181,6 +1183,7 @@ MonoBehaviour:
   hoveredObject: {fileID: 0}
   clickedObject: {fileID: 0}
   cellLayerIdx: 0
+  highlightOnClick: 0
 --- !u!114 &1359330467
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1201,11 +1204,14 @@ MonoBehaviour:
     type: 3}
   missedCellMarkerPrefab: {fileID: 5780526340500760578, guid: 9ea823812c5ba3340bc650841e310616,
     type: 3}
-  localPlayerController: {fileID: 0}
+  localPlayerState: {fileID: 0}
   cellObjects: []
   shipObjects: []
   hoveredObject: {fileID: 0}
   isDebugRenderEnabled: 1
+  testCoords: {x: 0, y: 0}
+  testSourceIsOpponent: 0
+  testHitResult: 0
 --- !u!4 &1359330469
 Transform:
   m_ObjectHideFlags: 0
@@ -1223,6 +1229,18 @@ Transform:
   - {fileID: 1150827592}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &1359330470
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1359330464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d89c24ce922efbe4b8376b9199a828f6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
 --- !u!1 &1623131451
 GameObject:
   m_ObjectHideFlags: 0
@@ -2506,7 +2524,7 @@ MonoBehaviour:
     type: 3}
   shipButtonParent: {fileID: 457435075}
   submitButton: {fileID: 492478171}
-  localPlayerController: {fileID: 0}
+  localPlayerState: {fileID: 0}
   shipButtons: []
 --- !u!114 &6672901819843417056
 MonoBehaviour:

@@ -28,7 +28,7 @@ public class WorldObjectSelectSystem : MonoBehaviour
     public Camera mainCamera;
 
     [Header("Auto Setup")]
-    public PlayerController localPlayerController;
+    public PlayerState localPlayerState;
 
     [Header("Debug View")]
     public Selectables hoverMode;
@@ -51,14 +51,15 @@ public class WorldObjectSelectSystem : MonoBehaviour
 
         clickableLayerMask = combinedMask;
 
-        PlayerController.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
+        PlayerState.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
+        PlayerState.onOrientationToggled.AddListener(OnOrientationToggled);
     }
 
-    public void OnLocalPlayerInitialized(PlayerController localPlayer)
+    public void OnLocalPlayerInitialized(PlayerState localPlayer)
     {
         if (localPlayer.isLocalPlayer)
         {
-            localPlayerController = localPlayer;
+            localPlayerState = localPlayer;
         }
     }
 
@@ -79,25 +80,24 @@ public class WorldObjectSelectSystem : MonoBehaviour
         }
     }
 
-    private List<Vector2Int> GetCells(CellObject originCellObject)
+    private List<Vector2Int> GetCells(CellObject originCellObject, ShipType shipType, Orientation orientation)
     {
-        LocalGameState localGameState = localPlayerController.GetLocalGameState();
-        SyncedGameState syncedGameState = localPlayerController.GetSyncedGameState();
+        LocalGameState localGameState = localPlayerState.GetLocalGameState();
 
-        int shipLength = ShipData.TypeToSize(syncedGameState.selectedShipType);
-        Vector2Int orientation = ShipData.GetOrientation(syncedGameState.shipOrientation);
+        int shipLength = ShipData.TypeToSize(shipType);
+        Vector2Int direction = ShipData.GetOrientation(orientation);
 
         return localGameState.battleField.GetBlindPathInRange(originCellObject.cellData.index.x, originCellObject.cellData.index.y,
-            shipLength, orientation);
+            shipLength, direction);
     }
 
-    private void OnCellHover(GameObject interactiveGameObject, GamePhase gamePhase)
+    private void OnCellHover(GameObject interactiveGameObject, GamePhase gamePhase, Orientation orientation)
     {
         CellObject hoveredCell = interactiveGameObject.GetComponent<CellObject>();
 
         if (gamePhase == GamePhase.Build)
         {
-            List<Vector2Int> cells = GetCells(hoveredCell);
+            List<Vector2Int> cells = GetCells(hoveredCell, localPlayerState.selectedShipType, orientation);
 
             foreach (Vector2Int coords in cells)
             {
@@ -110,13 +110,13 @@ public class WorldObjectSelectSystem : MonoBehaviour
             hoveredCell.OnStartHover();
         }
     }
-    private void OnCellsStopHover(GameObject interactiveGameObject, GamePhase gamePhase)
+    private void OnCellStopHover(GameObject interactiveGameObject, GamePhase gamePhase, Orientation orientation)
     {
         CellObject hoveredCell = interactiveGameObject.GetComponent<CellObject>();
 
         if (gamePhase == GamePhase.Build)
         {
-            List<Vector2Int> cells = GetCells(hoveredCell);
+            List<Vector2Int> cells = GetCells(hoveredCell, localPlayerState.selectedShipType, orientation);
 
             foreach (Vector2Int coords in cells)
             {
@@ -127,6 +127,16 @@ public class WorldObjectSelectSystem : MonoBehaviour
         else
         {
             hoveredCell.OnStopHover();
+        }
+    }
+
+    private void OnOrientationToggled(Orientation oldOn, Orientation newOn)
+    {
+        GamePhase gamePhase = localPlayerState.GetCurrentGamePhase();
+        if(gamePhase == GamePhase.Build && hoverMode == Selectables.Cells)
+        {
+            OnCellStopHover(hoveredObject, gamePhase, oldOn);
+            OnCellHover(hoveredObject, gamePhase, newOn);
         }
     }
 
@@ -170,8 +180,8 @@ public class WorldObjectSelectSystem : MonoBehaviour
             if (layerIndex == cellLayerIdx)
             {
                 hoverMode = Selectables.Cells;
-                GamePhase currentGamePhase = localPlayerController.GetCurrentGamePhase();
-                OnCellHover(hit.transform.gameObject, currentGamePhase);
+                GamePhase currentGamePhase = localPlayerState.GetCurrentGamePhase();
+                OnCellHover(hit.transform.gameObject, currentGamePhase, localPlayerState.selectedShipOrientation);
             }
 
             hoveredObject = hit.transform.gameObject;
@@ -194,8 +204,8 @@ public class WorldObjectSelectSystem : MonoBehaviour
         {
             case Selectables.Cells:
                 {
-                    GamePhase currentGamePhase = localPlayerController.GetCurrentGamePhase();
-                    OnCellsStopHover(hoveredObject, currentGamePhase);
+                    GamePhase currentGamePhase = localPlayerState.GetCurrentGamePhase();
+                    OnCellStopHover(hoveredObject, currentGamePhase, localPlayerState.selectedShipOrientation);
                     break;
                 }
             case Selectables.None:

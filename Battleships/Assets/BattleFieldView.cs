@@ -43,7 +43,7 @@ public class BattleFieldView : MonoBehaviour
     public GameObject missedCellMarkerPrefab;
 
     [Header("DebugView")]
-    public PlayerController localPlayerController;
+    public PlayerState localPlayerState;
 
     public List<CellObject> cellObjects;
     public List<ShipObject> shipObjects;
@@ -57,24 +57,24 @@ public class BattleFieldView : MonoBehaviour
 
     public void Awake()
     {
-        PlayerController.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
-        PlayerController.onTurnFinished.AddListener(ProcessCellHits);
-        PlayerController.onShipAdded.AddListener(OnShipAdded);
-        PlayerController.onShipDestroyed.AddListener(OnShipDestroyed);
+        PlayerState.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
+        PlayerState.onTurnFinished.AddListener(ProcessCellHits);
+        PlayerState.onShipAdded.AddListener(OnShipAdded);
+        PlayerState.onShipDestroyed.AddListener(OnShipDestroyed);
     }
 
-    public void OnLocalPlayerInitialized(PlayerController localPlayer)
+    public void OnLocalPlayerInitialized(PlayerState localPlayer)
     {
         if(localPlayer.isLocalPlayer)
         {
-            localPlayerController = localPlayer;
+            localPlayerState = localPlayer;
             Initialize();
         }
     }
 
     public void Initialize()
     {
-        LocalGameState localgameState = localPlayerController.GetLocalGameState();
+        LocalGameState localgameState = localPlayerState.GetLocalGameState();
         cellPrefab.transform.localScale = new Vector3(localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize);
 
         for (int i = 0; i < localgameState.battleField.setup.horizCellsCount; i++)
@@ -99,12 +99,12 @@ public class BattleFieldView : MonoBehaviour
 
    public void OnCellObjectSelected(int x, int y)
     {
-        localPlayerController.OnCellSelected(x,y);
+        localPlayerState.OnCellSelected(x,y);
     }
 
    public void VisualizeCellHit(CellHitData hitData)
     {
-        LocalGameState localGameState = localPlayerController.GetLocalGameState();
+        LocalGameState localGameState = localPlayerState.GetLocalGameState();
         if (hitData.sourceIsOpponent)
         {
             ShipObject damagedShip = shipObjects[hitData.shipInstanceIndex];
@@ -135,7 +135,7 @@ public class BattleFieldView : MonoBehaviour
 
     public void VisualizeCellMiss(CellHitData hitData)
     {
-        LocalGameState localGameState = localPlayerController.GetLocalGameState();
+        LocalGameState localGameState = localPlayerState.GetLocalGameState();
         BattleCell cell = localGameState.battleField.GetCell(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
 
         Vector3 position = cell.getBottomLeftOrigin();
@@ -144,17 +144,17 @@ public class BattleFieldView : MonoBehaviour
         cellObjects[cellObjectIndex].SpawnChildWithGlobalPosition(missedCellMarkerPrefab, position);
     }
 
-    public void OnShipAdded(PlayerController player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
+    public void OnShipAdded(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
     {
         if(player.isLocalPlayer)
         {
-            StaticShipData shipData = localPlayerController.GetLocalGameState().shipManager.GetShipData(shipInstanceData.type);
+            StaticShipData shipData = localPlayerState.GetLocalGameState().shipManager.GetShipData(shipInstanceData.type);
 
             int shipObjectId = SpawnShipObject(coords.x, coords.y, shipData, shipInstanceData, orientation);
             Debug.Assert(shipObjectId == shipInstanceData.instanceId);
         }
     }
-    public void OnShipDestroyed(PlayerController player, int shipIndex)
+    public void OnShipDestroyed(PlayerState player, int shipIndex)
     {
         if (player.isLocalPlayer)
         {
@@ -165,7 +165,7 @@ public class BattleFieldView : MonoBehaviour
     public int SpawnShipObject(int x, int y, StaticShipData shipData, RuntimeShipData runtimeShipData, Orientation orientation)
     {
         GameObject shipGameObject = GameObject.Instantiate(shipData.shipPrefab, shipSpawnParent);
-        shipGameObject.transform.position = localPlayerController.GetLocalGameState().battleField.GetCell(x, y).getBottomLeftOrigin();
+        shipGameObject.transform.position = localPlayerState.GetLocalGameState().battleField.GetCell(x, y).getBottomLeftOrigin();
 
         ShipObject shipObject = shipGameObject.GetComponent<ShipObject>();
         shipObject.Initialize(this, runtimeShipData, orientation, x, y);
@@ -189,7 +189,7 @@ public class BattleFieldView : MonoBehaviour
 
     public void ProcessCellHits()
     {
-        List<CellHitData> hitQueue = localPlayerController.hitQueue;
+        List<CellHitData> hitQueue = localPlayerState.hitQueue;
 
         foreach (CellHitData hitData in hitQueue)
         {
@@ -215,7 +215,7 @@ public class BattleFieldView : MonoBehaviour
 
     public CellObject GetCellObject(int x, int y)
     {
-        LocalGameState localgameState = localPlayerController.GetLocalGameState();
+        LocalGameState localgameState = localPlayerState.GetLocalGameState();
         int flatIndex = localgameState.battleField.GetFlatCellIndex(x, y);
         return cellObjects[flatIndex];
     }
@@ -223,9 +223,9 @@ public class BattleFieldView : MonoBehaviour
 
     public void TestHightlight(int x, int y)
     {
-        List<CellHitData> hitQueue = localPlayerController.hitQueue;
+        List<CellHitData> hitQueue = localPlayerState.hitQueue;
 
-        int flatIndex = localPlayerController.GetLocalGameState().battleField.GetFlatCellIndex(x, y);
+        int flatIndex = localPlayerState.GetLocalGameState().battleField.GetFlatCellIndex(x, y);
         CellHitData hitData = new CellHitData(testHitResult, 0, x, y, testSourceIsOpponent);
 
         hitQueue.Add(hitData);

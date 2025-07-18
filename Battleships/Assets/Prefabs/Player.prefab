@@ -9,8 +9,8 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1352571722129836338}
-  - component: {fileID: 4329252950419437345}
   - component: {fileID: -6096045098999540735}
+  - component: {fileID: -6582990571271940845}
   m_Layer: 0
   m_Name: Player
   m_TagString: Untagged
@@ -33,32 +33,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4329252950419437345
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3285088096005341966}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d89c24ce922efbe4b8376b9199a828f6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  syncDirection: 0
-  syncMode: 0
-  syncInterval: 0
-  syncedGameState:
-    field: []
-    currentShipCounts: 
-    shipInstances: []
-    totalShipCount: 0
-  playerId: 0
-  hitCoords: 0000000000000000
-  submitSignalReceived: 0
-  selectedShipType: 0
-  gamePhase: 0
-  hitQueue: []
 --- !u!114 &-6096045098999540735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -76,3 +50,30 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!114 &-6582990571271940845
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3285088096005341966}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 9ed32cd44cbb0da4db59d2663b510aa8, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  syncedState:
+    field: []
+    currentShipCounts: 
+    shipInstances: []
+    totalShipCount: 0
+    playerId: 0
+    hitCoords: 
+    submitSignalReceived: 0
+    gamePhase: 0
+  hitQueue: []
+  selectedShipType: 0
+  selectedShipOrientation: 0
