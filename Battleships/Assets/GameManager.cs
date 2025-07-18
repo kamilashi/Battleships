@@ -8,6 +8,7 @@ using UnityEngine.Events;
 
 public enum GamePhase
 {
+    Wait,
     Build,
     Combat,
     GameOver
@@ -62,10 +63,18 @@ public class GameManager : NetworkBehaviour
     [SerializeField] private GamePhase currentGamePhase;
     [SerializeField] private int currentTurnCount;
 
+
+    [Header("Test")]
+    public bool startIntoBuild;
+
     void Awake()
     {
         PlayerState.onPlayerSpawnedEvent.AddListener(RegisterPlayer);
         PlayerState.onPlayerDespawnedEvent.AddListener(DeregisterPlayer);
+        PlayerState.onPlayerRestartEvent.AddListener(RegisterPlayer);
+
+        currentGamePhase = startIntoBuild ? GamePhase.Build : GamePhase.Wait;
+
         currentTurnCount = 0;
     }
 
@@ -74,6 +83,17 @@ public class GameManager : NetworkBehaviour
         if(players.Count != intendedPlayerCount)
         {
             return;
+        }
+
+        if (currentGamePhase == GamePhase.Wait)
+        {
+            currentGamePhase = GamePhase.Build;
+            foreach (PlayerState playerState in players)
+            {
+                playerState.syncedState.gamePhase = currentGamePhase;
+                playerState.RpcSyncGameStateWClient(playerState.connectionToClient, playerState.syncedState);
+                playerState.RpcOnGamePhaseChanged(playerState.connectionToClient, GamePhase.Wait, currentGamePhase);
+            }
         }
 
         if (players[0].syncedState.submitSignalReceived && players[1].syncedState.submitSignalReceived) 
@@ -110,6 +130,11 @@ public class GameManager : NetworkBehaviour
                     playerState.RpcOnGamePhaseChanged(playerState.connectionToClient, oldGamePhase, currentGamePhase);
                 }
             }
+
+            if(currentGamePhase == GamePhase.GameOver)
+            {
+                ResetGameManager();
+            }
         }
     }
 
@@ -123,7 +148,7 @@ public class GameManager : NetworkBehaviour
 
         int playerIndex = players.Count;
 
-        if(!player.isLocalPlayer)
+        if (!player.isLocalPlayer)
         {
             player.Initialize();
         }
@@ -133,10 +158,17 @@ public class GameManager : NetworkBehaviour
         player.syncedState.playerId = playerIndex;
         players.Add(player);
     }
+
+    private void ResetGameManager()
+    {
+        players.Clear();
+        currentTurnCount = 0;
+    }
     private void DeregisterPlayer(PlayerState player)
     {
         players.Remove(player);
     }
+
 
     private void TryHitShip(int x, int y, PlayerState attackerPlayer, PlayerState targetPlayer)
     {

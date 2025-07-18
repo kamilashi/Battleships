@@ -39,7 +39,7 @@ public class WorldObjectSelectSystem : MonoBehaviour
 
     public int cellLayerIdx;
 
-    [Header("Debug")]
+    [Header("Test")]
     public bool highlightOnClick;
 
     private void Awake()

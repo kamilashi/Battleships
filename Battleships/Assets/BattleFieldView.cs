@@ -56,7 +56,7 @@ public class BattleFieldView : MonoBehaviour
     public GameObject damagedCellMarkerPrefab;
     public GameObject missedCellMarkerPrefab;
 
-    [Header("DebugView")]
+    [Header("Debug View")]
     public PlayerState localPlayerState;
 
     public List<CellObject> cellObjects;
@@ -64,7 +64,7 @@ public class BattleFieldView : MonoBehaviour
     public CellObject hoveredObject;
     public bool isDebugRenderEnabled = false;
 
-    [Header("DebugView")]
+    [Header("Test")]
     public Vector2Int testCoords;
     public bool testSourceIsOpponent;
     public HitResult testHitResult;

@@ -30,6 +30,7 @@ public class PlayerState : NetworkBehaviour
     // player -> server
     public static UnityEvent<PlayerState> onPlayerSpawnedEvent = new UnityEvent<PlayerState>();
     public static UnityEvent<PlayerState> onPlayerDespawnedEvent = new UnityEvent<PlayerState>();
+    public static UnityEvent<PlayerState> onPlayerRestartEvent = new UnityEvent<PlayerState>();
 
     // server -> player
     public static UnityEvent onTurnFinished = new UnityEvent();
@@ -224,11 +225,18 @@ public class PlayerState : NetworkBehaviour
         onPlayerDespawnedEvent?.Invoke(this);
     }
 
+    [Command]
+    public void CmdRequestRestart()
+    {
+        onPlayerRestartEvent?.Invoke(this);
+    }
+
     [TargetRpc]
     public void RpcInitializeClient(NetworkConnectionToClient conn)
     {
         Initialize();
     }
+
     [TargetRpc]
     public void RpcOnGamePhaseChanged(NetworkConnectionToClient conn, GamePhase oldPhase, GamePhase newPhase)
     {

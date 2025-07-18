@@ -6,13 +6,21 @@ using UnityEngine.UI;
 
 public class UIController : MonoBehaviour
 {
-    [Header("Setup")]
+    [Header("Setup - Gameplay")]
+
+    public Canvas gamePlayCanvas;
     public GameObject shipButtonPrefab;
     public RectTransform shipButtonParent;
     public Button submitButton;
     public TMPro.TMP_Text gamePhaseText;
     public TMPro.TMP_Text hintText;
 
+    [Header("Setup - Game Over")]
+    public Canvas gameOverCanvas;
+    public TMPro.TMP_Text gameOverTitleText;
+    public Button restartButton;
+
+    [Header("Setup - Message")]
     public RectTransform messageContainerTransform;
     public TMPro.TMP_Text messageText;
     public float messageStayDuration;
@@ -37,8 +45,11 @@ public class UIController : MonoBehaviour
         PlayerState.onMessageLogged.AddListener(OnLogMessage);
         PlayerState.onGamePhaseChanged.AddListener(OnGamePhaseChanged);
         submitButton.onClick.AddListener(OnSubmitButtonClicked);
+        restartButton.onClick.AddListener(OnRestartRequested);
         messagePanelMaxHeight = messageContainerTransform.rect.height;
         ResetMessagePanel();
+
+        OnGamePhaseChanged(GamePhase.Wait, GamePhase.Wait);
     }
 
     void OnLocalPlayerInitialized(PlayerState placerState)
@@ -61,8 +72,6 @@ public class UIController : MonoBehaviour
             shipButtons.Add(buttonObj);
             buttonObj.Initialize(this, shipDatas[i]);
         }
-
-        OnGamePhaseChanged(GamePhase.Build, GamePhase.Build);
     }
 
     public void UpdateShipButtons(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
@@ -90,17 +99,42 @@ public class UIController : MonoBehaviour
     {
         switch(newPhase)
         {
+            case GamePhase.Wait:
+                {
+                    gameOverCanvas.gameObject.SetActive(true);
+                    gamePlayCanvas.gameObject.SetActive(false);
+
+                    gameOverTitleText.text = "Waiting for players...";
+                    restartButton.gameObject.SetActive(false);
+                }
+                break;
             case GamePhase.Build:
                 {
+                    gamePlayCanvas.gameObject.SetActive(true);
+                    gameOverCanvas.gameObject.SetActive(false);
+
                     gamePhaseText.text = "Build";
                     hintText.text = "Toggle orientation:\r\n\r\nR / middle m. b.\r\n\r\n";
                     hintText.text += "Submit to end turn.\r\n\r\n";
+                    shipButtonParent.gameObject.SetActive(true);
                 }
                 break;
             case GamePhase.Combat:
                 {
                     gamePhaseText.text = "Fight";
                     hintText.text = "Submit to end turn.\r\n\r\n";
+                    shipButtonParent.gameObject.SetActive(false);
+                }
+                break;
+            case GamePhase.GameOver:
+                {
+                    SyncedGameState syncedGameState = localPlayerState.GetSyncedGameState();
+                    restartButton.gameObject.SetActive(true);
+                    gameOverCanvas.gameObject.SetActive(true);
+                    gamePlayCanvas.gameObject.SetActive(false);
+
+                    gameOverTitleText.text = syncedGameState.gameOverState == GameOverState.Lose ? "You lost! " :
+                        syncedGameState.gameOverState == GameOverState.Win ? "You won! " : " It's a tie...";
                 }
                 break;
         }
@@ -156,6 +190,10 @@ public class UIController : MonoBehaviour
 
         messageText.text = message;
         messageLogCoroutine = StartCoroutine(LogMessageCoroutine());
+    }
+    private void OnRestartRequested()
+    {
+        localPlayerState.CmdRequestRestart();
     }
 
     private IEnumerator LogMessageCoroutine()
