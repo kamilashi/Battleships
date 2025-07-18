@@ -14,7 +14,7 @@ public class PlayerController : MonoBehaviour
 
     private void Update()
     {
-        if(Input.GetKeyDown(KeyCode.R) || Input.GetMouseButtonDown(3))
+        if(Input.GetKeyDown(KeyCode.R) || Input.GetMouseButtonDown(2))
         {
             localPlayerState.OnShipOrientationToggled();
         }
