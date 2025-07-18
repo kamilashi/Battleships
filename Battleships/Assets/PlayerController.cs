@@ -193,6 +193,10 @@ public class PlayerController : NetworkBehaviour
     {
         return syncedState;
     }
+    public GamePhase GetCurrentGamePhase()
+    {
+        return syncedState.gamePhase;
+    }
 
     [Command]
     private void CmdOnClientSpawned()

@@ -35,12 +35,12 @@ public class ShipObject : MonoBehaviour, IVisualSpawner
 
         Debug.Assert(segments.Count == shipData.Size());
 
-        for(int i= 0; i< shipData.Size(); i++)
+        List<Vector2Int> availableCoords = localBattleField.GetBlindPathInRange(originX, originY,
+            shipData.Size(), direction);
+
+        for (int i = 0; i < availableCoords.Count; i++)
         {
-            int coordX = originX + i * direction.x;
-            int coordY = originY + i * direction.y;
-            //CellData cellData = battleFieldView.GetCellObject(coordX, coordY).cellData;
-            int flatIndex = localBattleField.GetFlatCellIndex(coordX, coordY);
+            int flatIndex = localBattleField.GetFlatCellIndex(availableCoords[i].x, availableCoords[i].y);
 
             ShipObjectData shipObjectData = new ShipObjectData();
             shipObjectData.segment = segments[i];

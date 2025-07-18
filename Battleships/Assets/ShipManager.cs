@@ -47,6 +47,11 @@ public abstract class ShipData
     {
         return orientation == Orientation.Vertical ? new Vector2Int(0, 1) : new Vector2Int(1, 0);
     }
+
+    static public int TypeToSize(ShipType type)
+    {
+        return (int)type + 1;
+    }
 }
 
 [Serializable]

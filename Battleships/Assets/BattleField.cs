@@ -4,6 +4,7 @@ using System;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using static UnityEngine.UI.Image;
 
 [Serializable]
 public class BattleCell
@@ -107,7 +108,26 @@ public class BattleField
         return x >= 0 && y >= 0 && x < setup.horizCellsCount && y < setup.vertiCellsCount;
     }
 
-    private bool IsPathFree(int x, int y, int length, Vector2Int direction, bool adjacentSpaceCheck)
+    private bool IsMainCellFree(int coordX, int coordY)
+    {
+        if (!IsInRange(coordX, coordY) || !field[coordX * setup.vertiCellsCount + coordY].IsFree())
+        {
+            return false;
+        }
+
+        return true;
+    }
+    private bool IsAdjacentCellFree(int coordX, int coordY)
+    {
+        if (IsInRange(coordX, coordY) && !field[coordX * setup.vertiCellsCount + coordY].IsFree())
+        {
+            return false;
+        }
+
+        return true;
+    }
+
+    private bool IsPathFree(List<Vector2Int> path, int x, int y, int length, Vector2Int direction, bool adjacentSpaceCheck)
     {
         int coordX;
         int coordY;
@@ -119,51 +139,79 @@ public class BattleField
 
             if(adjacentSpaceCheck)
             {
-                if (IsInRange(coordX, coordY) && !field[coordX * setup.vertiCellsCount + coordY].IsFree())
+                if (!IsAdjacentCellFree(coordX, coordY))
                 {
                     return false;
                 }
             }
             else
             {
-                if (!IsInRange(coordX, coordY) || !field[coordX * setup.vertiCellsCount + coordY].IsFree())
+                if (!IsMainCellFree(coordX, coordY))
                 {
                     return false;
                 }
+            }
+
+            if(path != null)
+            {
+                path.Add(new Vector2Int(coordX, coordY));
             }
         }
 
         return true;
     }
 
-    public bool CanPlaceShip(int x, int y, StaticShipData shipData, Orientation shipOrientation)
+    public bool IsMainPathFree(List<Vector2Int> path, int x, int y, int shipSize, Vector2Int orientation)
     {
-        bool areCellsFree = true;
-        Vector2Int orientation = StaticShipData.GetOrientation(shipOrientation);
-        Vector2Int cellCoords = new Vector2Int(x, y);
-        int shipSize = shipData.Size();
+        return IsPathFree(path, x, y, shipSize, orientation, false);
+    }
 
-        if (!IsPathFree(x, y, shipSize, orientation, false))
+    public List<Vector2Int> GetBlindPathInRange(int x, int y, int length, Vector2Int direction)
+    {
+        List < Vector2Int > path = new List < Vector2Int >();
+
+        for (int i = 0; i < length; i++)
         {
-            return false;
+            int coordX = x + i * direction.x;
+            int coordY = y + i * direction.y;
+
+            if(!IsInRange(coordX, coordY))
+            { break; }
+
+            path.Add(new Vector2Int(coordX, coordY));
         }
+
+        return path;
+    }
+
+    public bool IsAdjacentPathFree(List<Vector2Int> path, int x, int y, int shipSize, Vector2Int orientation)
+    {
+        Vector2Int cellCoords = new Vector2Int(x, y);
 
         cellCoords.x = x - orientation.x;
         cellCoords.y = y - orientation.y;
 
-        areCellsFree = !IsInRange(cellCoords.x, cellCoords.y) || field[cellCoords.x * setup.vertiCellsCount + cellCoords.y].IsFree();
+        if(!IsAdjacentCellFree(cellCoords.x, cellCoords.y))
+        {
+            return false;
+        }
+
+        if(path!=null)
+        {
+            path.Add(new Vector2Int(cellCoords.x, cellCoords.y));
+        }
 
         Vector2Int localRight = Helpers.GetRightCWVector(orientation);
         cellCoords += localRight;
 
-        if(!areCellsFree || !IsPathFree(cellCoords.x, cellCoords.y, shipSize + 2, orientation, true))
+        if (!IsPathFree(path, cellCoords.x, cellCoords.y, shipSize + 2, orientation, true))
         {
             return false;
         }
 
         cellCoords -= 2 * localRight;
 
-        if (!areCellsFree || !IsPathFree(cellCoords.x, cellCoords.y, shipSize + 2, orientation, true))
+        if (!IsPathFree(path, cellCoords.x, cellCoords.y, shipSize + 2, orientation, true))
         {
             return false;
         }
@@ -171,8 +219,26 @@ public class BattleField
         cellCoords.x = x + shipSize * orientation.x;
         cellCoords.y = y + shipSize * orientation.y;
 
-        areCellsFree = !IsInRange(cellCoords.x, cellCoords.y) || field[cellCoords.x * setup.vertiCellsCount + cellCoords.y].IsFree();
-        return areCellsFree;
+        if (!IsAdjacentCellFree(cellCoords.x, cellCoords.y))
+        {
+            return false;
+        }
+
+        if (path != null)
+        {
+            path.Add(new Vector2Int(cellCoords.x, cellCoords.y));
+        }
+
+        return true;
+    }
+
+    public bool CanPlaceShip(int x, int y, StaticShipData shipData, Orientation shipOrientation)
+    {
+        Vector2Int orientation = StaticShipData.GetOrientation(shipOrientation);
+        Vector2Int cellCoords = new Vector2Int(x, y);
+        int shipSize = shipData.Size();
+
+        return IsMainPathFree(null, x, y, shipSize, orientation) && IsAdjacentPathFree(null, x, y, shipSize, orientation);
     }
 
     public void PlaceShip(int x, int y, RuntimeShipData runtimeShipData, StaticShipData staticShipData, Orientation shipOrientation)

@@ -27,8 +27,8 @@ public class WorldObjectSelectSystem : MonoBehaviour
     public LayerMask cellLayer;
     public Camera mainCamera;
 
-    /*[Header("Auto Setup")]
-    public PlayerController localPlayerController;*/
+    [Header("Auto Setup")]
+    public PlayerController localPlayerController;
 
     [Header("Debug View")]
     public Selectables hoverMode;
@@ -51,17 +51,16 @@ public class WorldObjectSelectSystem : MonoBehaviour
 
         clickableLayerMask = combinedMask;
 
-        //PlayerController.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
+        PlayerController.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
     }
 
-/*
     public void OnLocalPlayerInitialized(PlayerController localPlayer)
     {
         if (localPlayer.isLocalPlayer)
         {
             localPlayerController = localPlayer;
         }
-    }*/
+    }
 
     void Update()
     {
@@ -80,15 +79,55 @@ public class WorldObjectSelectSystem : MonoBehaviour
         }
     }
 
-    private void OnCellHover(GameObject interactiveGameObject)
+    private List<Vector2Int> GetCells(CellObject originCellObject)
     {
-        CellObject interactiveObject = interactiveGameObject.GetComponent<CellObject>();
-        interactiveObject.OnStartHover();
+        LocalGameState localGameState = localPlayerController.GetLocalGameState();
+        SyncedGameState syncedGameState = localPlayerController.GetSyncedGameState();
+
+        int shipLength = ShipData.TypeToSize(syncedGameState.selectedShipType);
+        Vector2Int orientation = ShipData.GetOrientation(syncedGameState.shipOrientation);
+
+        return localGameState.battleField.GetBlindPathInRange(originCellObject.cellData.index.x, originCellObject.cellData.index.y,
+            shipLength, orientation);
     }
-    private void OnCellsStopHover(GameObject interactiveGameObject)
+
+    private void OnCellHover(GameObject interactiveGameObject, GamePhase gamePhase)
     {
-        CellObject interactiveObject = interactiveGameObject.GetComponent<CellObject>();
-        interactiveObject.OnStopHover();
+        CellObject hoveredCell = interactiveGameObject.GetComponent<CellObject>();
+
+        if (gamePhase == GamePhase.Build)
+        {
+            List<Vector2Int> cells = GetCells(hoveredCell);
+
+            foreach (Vector2Int coords in cells)
+            {
+                CellObject cellObject = hoveredCell.battleFieldView.GetCellObject(coords.x, coords.y);
+                cellObject.OnStartHover();
+            }
+        }
+        else
+        {
+            hoveredCell.OnStartHover();
+        }
+    }
+    private void OnCellsStopHover(GameObject interactiveGameObject, GamePhase gamePhase)
+    {
+        CellObject hoveredCell = interactiveGameObject.GetComponent<CellObject>();
+
+        if (gamePhase == GamePhase.Build)
+        {
+            List<Vector2Int> cells = GetCells(hoveredCell);
+
+            foreach (Vector2Int coords in cells)
+            {
+                CellObject cellObject = hoveredCell.battleFieldView.GetCellObject(coords.x, coords.y);
+                cellObject.OnStopHover();
+            }
+        }
+        else
+        {
+            hoveredCell.OnStopHover();
+        }
     }
 
     private bool ProcessSelection() // needs to be called after processHovering
@@ -131,7 +170,8 @@ public class WorldObjectSelectSystem : MonoBehaviour
             if (layerIndex == cellLayerIdx)
             {
                 hoverMode = Selectables.Cells;
-                OnCellHover(hit.transform.gameObject);
+                GamePhase currentGamePhase = localPlayerController.GetCurrentGamePhase();
+                OnCellHover(hit.transform.gameObject, currentGamePhase);
             }
 
             hoveredObject = hit.transform.gameObject;
@@ -154,7 +194,8 @@ public class WorldObjectSelectSystem : MonoBehaviour
         {
             case Selectables.Cells:
                 {
-                    OnCellsStopHover(hoveredObject);
+                    GamePhase currentGamePhase = localPlayerController.GetCurrentGamePhase();
+                    OnCellsStopHover(hoveredObject, currentGamePhase);
                     break;
                 }
             case Selectables.None:

@@ -187,8 +187,6 @@ public class BattleFieldView : MonoBehaviour
         Destroy(shipGameObject);
     }
 
-
-
     public void ProcessCellHits()
     {
         List<CellHitData> hitQueue = localPlayerController.hitQueue;
