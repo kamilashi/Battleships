@@ -50,11 +50,13 @@ public class BattleFieldView : MonoBehaviour
     [Header("Manual Setup")]
     public Transform cellSpawnParent;
     public Transform shipSpawnParent;
-
-    [Header("Visualization")]
     public GameObject cellPrefab;
     public GameObject damagedCellMarkerPrefab;
     public GameObject missedCellMarkerPrefab;
+
+    [Header("Setup - Animation")]
+    public float shipFieldTranslateSpeed;
+    public float shipFieldTranslateDistance;
 
     [Header("Debug View")]
     public PlayerState localPlayerState;
@@ -75,6 +77,7 @@ public class BattleFieldView : MonoBehaviour
         PlayerState.onTurnFinished.AddListener(ProcessCellHits);
         PlayerState.onShipAdded.AddListener(OnShipAdded);
         PlayerState.onShipDestroyed.AddListener(OnShipDestroyed);
+        PlayerState.onGamePhaseChanged.AddListener(OnGamePhaseChanged);
     }
 
     public void OnLocalPlayerInitialized(PlayerState localPlayer)
@@ -110,8 +113,14 @@ public class BattleFieldView : MonoBehaviour
             }
         }
     }
+    public CellObject GetCellObject(int x, int y)
+    {
+        LocalGameState localgameState = localPlayerState.GetLocalGameState();
+        int flatIndex = localgameState.battleField.GetFlatCellIndex(x, y);
+        return cellObjects[flatIndex];
+    }
 
-   public void OnCellObjectSelected(int x, int y)
+    public void OnCellObjectSelected(int x, int y)
     {
         localPlayerState.OnCellSelected(x,y);
     }
@@ -123,17 +132,11 @@ public class BattleFieldView : MonoBehaviour
 
         Vector3 position = cell.getBottomLeftOrigin();
 
-        if (!cell.IsFree())
-        {
-            ShipObject occupiedObject = shipObjects[cell.shipData.instanceId];
-            position.y += occupiedObject.objectHeight;
-        }
-
         int cellObjectIndex = localGameState.battleField.GetFlatCellIndex(x, y);
         cellObjects[cellObjectIndex].SpawnChildWithGlobalPosition(markerPrefab, position);
     }
 
-   public void VisualizeCellHit(CellHitData hitData)
+   private void VisualizeCellHit(CellHitData hitData)
     {
         if (hitData.sourceIsOpponent)
         {
@@ -149,7 +152,7 @@ public class BattleFieldView : MonoBehaviour
         }
     }
 
-    public void VisualizeCellKill(CellHitData hitData)
+    private void VisualizeCellKill(CellHitData hitData)
     {
         LocalGameState localGameState = localPlayerState.GetLocalGameState();
         if (hitData.sourceIsOpponent)
@@ -162,22 +165,15 @@ public class BattleFieldView : MonoBehaviour
         else
         {
             VisualizeOpponentCellInfo(hitData.hitCellCoords[0], hitData.hitCellCoords[1], damagedCellMarkerPrefab);
-
-            /*List<Vector2Int> surroundingCells = localGameState.battleField.GetBlindAdjacentPathInRange(hitData.hitCellCoords[0], hitData.hitCellCoords[1], hitData.killedShipSize, ShipData.GetOrientation(hitData.killedShipOrientation));
-
-            foreach (Vector2Int cell in surroundingCells)
-            {
-                VisualizeOpponentCellInfo(cell.x, cell.y, missedCellMarkerPrefab);
-            }*/
         }
     }
 
-    public void VisualizeCellMiss(CellHitData hitData)
+    private void VisualizeCellMiss(CellHitData hitData)
     {
         VisualizeOpponentCellInfo(hitData.hitCellCoords[0], hitData.hitCellCoords[1], missedCellMarkerPrefab);
     }
 
-    public void OnShipAdded(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
+    private void OnShipAdded(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
     {
         if(player.isLocalPlayer)
         {
@@ -187,7 +183,7 @@ public class BattleFieldView : MonoBehaviour
             Debug.Assert(shipObjectId == shipInstanceData.instanceId);
         }
     }
-    public void OnShipDestroyed(PlayerState player, int shipIndex)
+    private void OnShipDestroyed(PlayerState player, int shipIndex)
     {
         /*if (player.isLocalPlayer)
         {
@@ -195,7 +191,7 @@ public class BattleFieldView : MonoBehaviour
         }*/
     }
 
-    public int SpawnShipObject(int x, int y, StaticShipData shipData, RuntimeShipData runtimeShipData, Orientation orientation)
+    private int SpawnShipObject(int x, int y, StaticShipData shipData, RuntimeShipData runtimeShipData, Orientation orientation)
     {
         GameObject shipGameObject = GameObject.Instantiate(shipData.shipPrefab, shipSpawnParent);
         shipGameObject.transform.position = localPlayerState.GetLocalGameState().battleField.GetCell(x, y).getBottomLeftOrigin();
@@ -214,13 +210,13 @@ public class BattleFieldView : MonoBehaviour
         return shipObjectIndex;
     }
 
-    public void DestroyShipObject(int index)
+    private void DestroyShipObject(int index)
     {
         GameObject shipGameObject = shipObjects[index].gameObject;
         Destroy(shipGameObject);
     }
 
-    public void ProcessCellHits()
+    private void ProcessCellHits()
     {
         List<CellHitData> hitQueue = localPlayerState.hitQueue;
 
@@ -245,14 +241,29 @@ public class BattleFieldView : MonoBehaviour
         hitQueue.Clear();
     }
 
-
-    public CellObject GetCellObject(int x, int y)
+    private void OnGamePhaseChanged(GamePhase oldPhase, GamePhase newPhase)
     {
-        LocalGameState localgameState = localPlayerState.GetLocalGameState();
-        int flatIndex = localgameState.battleField.GetFlatCellIndex(x, y);
-        return cellObjects[flatIndex];
+        if (newPhase == GamePhase.Build)
+        {
+            StartCoroutine(ShiftDownShipField());
+        }
     }
 
+    private IEnumerator ShiftDownShipField()
+    {
+        float progress = 0.0f;
+        Vector3 downVelocity = Vector3.zero;
+
+        Action<Vector3> anim = (Vector3 down) => { shipSpawnParent.Translate(down); };
+
+        while (!Animation.TranslateUpTo(progress, shipFieldTranslateDistance, downVelocity, anim))
+        {
+            float delta = shipFieldTranslateSpeed * Time.deltaTime;
+            downVelocity.y = -delta;
+            progress += delta;
+            yield return null;
+        }
+    }
 
     public void TestHightlight(int x, int y)
     {
@@ -264,5 +275,11 @@ public class BattleFieldView : MonoBehaviour
         hitQueue.Add(hitData);
 
         ProcessCellHits();
+    }
+
+    [ContextMenu("TestShipFieldTranslate")]
+    public void TestShipFieldTranslate()
+    {
+        StartCoroutine(ShiftDownShipField());
     }
 }

@@ -140,30 +140,7 @@ public class UIController : MonoBehaviour
         }
     }
 
-    private bool AnimateUp(float parameter, float endValue, Action<float> animation)
-    {
-        animation.Invoke(parameter);
-
-        if (parameter >= endValue) 
-        {
-            return true;
-        }
-
-        return false;
-    }
-    private bool AnimateDown(float parameter, float endValue, Action<float> animation)
-    {
-        animation.Invoke(parameter);
-
-        if (parameter <= endValue)
-        {
-            return true;
-        }
-
-        return false;
-    }
-
-    private void EditMessageHeight(float heightMultiplier)
+    private void ScaleMessageY(float heightMultiplier)
     {
         Vector2 currentSize = messageContainerTransform.sizeDelta;
         messageContainerTransform.sizeDelta = new Vector2(currentSize.x, messagePanelMaxHeight * heightMultiplier);
@@ -200,7 +177,7 @@ public class UIController : MonoBehaviour
     {
         float progress = 0.0f;
 
-        while (!AnimateUp(progress, 1.0f, EditMessageHeight))
+        while (!Animation.AnimateUp(progress, 1.0f, ScaleMessageY))
         {
             progress += messageAnimateSpeed * Time.deltaTime;
             debugProgress = progress;
@@ -214,7 +191,7 @@ public class UIController : MonoBehaviour
             yield return null;
         }
 
-        while (!AnimateDown(progress, 0.0f, EditMessageHeight))
+        while (!Animation.AnimateDown(progress, 0.0f, ScaleMessageY))
         {
             progress -= messageAnimateSpeed * Time.deltaTime;
             debugProgress = progress;
@@ -228,7 +205,7 @@ public class UIController : MonoBehaviour
 
     private void ResetMessagePanel()
     {
-        EditMessageHeight(0.0f);
+        ScaleMessageY(0.0f);
         messageText.enabled = false;
     }
 }

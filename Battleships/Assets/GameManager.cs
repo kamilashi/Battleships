@@ -73,7 +73,7 @@ public class GameManager : NetworkBehaviour
         PlayerState.onPlayerDespawnedEvent.AddListener(DeregisterPlayer);
         PlayerState.onPlayerRestartEvent.AddListener(RegisterPlayer);
 
-        currentGamePhase = startIntoBuild ? GamePhase.Build : GamePhase.Wait;
+        currentGamePhase = GamePhase.Wait;
 
         currentTurnCount = 0;
     }
@@ -87,13 +87,7 @@ public class GameManager : NetworkBehaviour
 
         if (currentGamePhase == GamePhase.Wait)
         {
-            currentGamePhase = GamePhase.Build;
-            foreach (PlayerState playerState in players)
-            {
-                playerState.syncedState.gamePhase = currentGamePhase;
-                playerState.RpcSyncGameStateWClient(playerState.connectionToClient, playerState.syncedState);
-                playerState.RpcOnGamePhaseChanged(playerState.connectionToClient, GamePhase.Wait, currentGamePhase);
-            }
+            SwitchToBuildPhase();
         }
 
         if (players[0].syncedState.submitSignalReceived && players[1].syncedState.submitSignalReceived) 
@@ -157,6 +151,12 @@ public class GameManager : NetworkBehaviour
 
         player.syncedState.playerId = playerIndex;
         players.Add(player);
+
+
+        if (startIntoBuild)
+        {
+            SwitchToBuildPhase();
+        }
     }
 
     private void ResetGameManager()
@@ -169,6 +169,16 @@ public class GameManager : NetworkBehaviour
         players.Remove(player);
     }
 
+    private void SwitchToBuildPhase()
+    {
+        currentGamePhase = GamePhase.Build;
+        foreach (PlayerState playerState in players)
+        {
+            playerState.syncedState.gamePhase = currentGamePhase;
+            playerState.RpcSyncGameStateWClient(playerState.connectionToClient, playerState.syncedState);
+            playerState.RpcOnGamePhaseChanged(playerState.connectionToClient, GamePhase.Wait, currentGamePhase);
+        }
+    }
 
     private void TryHitShip(int x, int y, PlayerState attackerPlayer, PlayerState targetPlayer)
     {
