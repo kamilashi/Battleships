@@ -298,7 +298,7 @@ public class PlayerState : NetworkBehaviour
             syncedState.field[i] = cell;
         }
 
-        int shipsCount = localGameState.shipManager.totalShipCount;
+        int shipsCount = localGameState.shipManager.shipInstances.Count;
 
         syncedState.shipInstances = new RuntimeShipData[shipsCount];
         for (int i = 0; i < shipsCount; i++)
