@@ -80,6 +80,11 @@ public class PlayerState : NetworkBehaviour
         localGameState = new LocalGameState(setup.battlefieldSetup, setup.shipManagerSetup);
 
         onLocalPlayerInitializedEvent?.Invoke(this);
+
+        if(hitQueue.Count != 0)
+        {
+            hitQueue.Clear();
+        }
     }
     private void TryPlaceShip(int x, int y, ShipType type)
     {

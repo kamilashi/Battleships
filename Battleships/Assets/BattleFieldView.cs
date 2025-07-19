@@ -64,7 +64,7 @@ public class BattleFieldView : MonoBehaviour
 
     public List<CellObject> cellObjects;
     public List<ShipObject> shipObjects;
-    public int highlightedHitCell = -1;
+    public int highlightedHitCell;
     public CellObject hoveredObject;
     public bool isDebugRenderEnabled = false;
 
@@ -98,6 +98,28 @@ public class BattleFieldView : MonoBehaviour
         LocalGameState localgameState = localPlayerState.GetLocalGameState();
         cellPrefab.transform.localScale = new Vector3(localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize, localgameState.battleField.setup.cellSize);
 
+        highlightedHitCell = -1;
+
+        if (cellObjects.Count != 0)
+        {
+            foreach (CellObject cellObj in cellObjects)
+            {
+                Destroy(cellObj.gameObject);
+            }
+
+            cellObjects.Clear();
+        }
+
+        if (shipObjects.Count != 0)
+        {
+            foreach (ShipObject shipObj in shipObjects)
+            {
+                Destroy(shipObj.gameObject);
+            }
+
+            shipObjects.Clear();
+        }
+
         for (int i = 0; i < localgameState.battleField.setup.horizCellsCount; i++)
         {
             for (int j = 0; j < localgameState.battleField.setup.vertiCellsCount; j++)
@@ -117,6 +139,7 @@ public class BattleFieldView : MonoBehaviour
             }
         }
     }
+
     public CellObject GetCellObject(int x, int y)
     {
         LocalGameState localgameState = localPlayerState.GetLocalGameState();
@@ -165,6 +188,14 @@ public class BattleFieldView : MonoBehaviour
 
             int flatIndex = localGameState.battleField.GetFlatCellIndex(hitData.hitCellCoords[0], hitData.hitCellCoords[1]);
             damagedShip.HighlightShipSegment(flatIndex);
+
+            RuntimeShipData killedShipData = damagedShip.shipData;
+            List<Vector2Int> adjacentCoords = localGameState.battleField.GetBlindAdjacentPathInRange(killedShipData.origin[0], killedShipData.origin[1], killedShipData.Size(), killedShipData.GetOrientation());
+
+            foreach(Vector2Int adjacentCell in adjacentCoords)
+            {
+                GetCellObject(adjacentCell.x, adjacentCell.y).HighlightExposedCell();
+            }
         }
         else
         {
@@ -182,7 +213,7 @@ public class BattleFieldView : MonoBehaviour
 
         LocalGameState localGameState = localPlayerState.GetLocalGameState();
         int cellObjectIndex = localGameState.battleField.GetFlatCellIndex(x, y);
-        cellObjects[cellObjectIndex].OnHighlightPermanent();
+        cellObjects[cellObjectIndex].HighlightHitCell();
 
         highlightedHitCell = cellObjectIndex;
     }
@@ -191,7 +222,7 @@ public class BattleFieldView : MonoBehaviour
     {
         if (highlightedHitCell >= 0)
         {
-            cellObjects[highlightedHitCell].OnStopHighlightPermanent();
+            cellObjects[highlightedHitCell].StopHighlightHitCell();
             highlightedHitCell = -1;
         }
     }

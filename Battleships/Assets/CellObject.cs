@@ -21,8 +21,8 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
 {
     [Header("Setup in Prefab")]
     public MeshRenderer meshRenderer;
-    public Color temporaryHighlightColor;
-    public Color permanentHighlightColor;
+    public Color mainColor;
+    public Color hitColor;
 
     [Header("Auto Setup")]
     public CellData cellData;
@@ -46,7 +46,7 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
     {
         if(!IsHighlightLocked)
         {
-            SetMaterialProperty("_HighlightColor", temporaryHighlightColor);
+            SetMaterialProperty("_HighlightColor", mainColor);
             SetMaterialProperty("_Highlighted", 1.0f);
         }
     }
@@ -59,14 +59,18 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
         }
     }
 
-    public void OnHighlightPermanent()
+    public void HighlightHitCell()
     {
-        SetMaterialProperty("_HighlightColor", permanentHighlightColor);
+        SetMaterialProperty("_HighlightColor", hitColor);
         SetMaterialProperty("_Highlighted", 1.0f);
         IsHighlightLocked = true;
     }
+    public void HighlightExposedCell()
+    {
+        SetMaterialProperty("_MainColor", hitColor);
+    }
 
-    public void OnStopHighlightPermanent()
+    public void StopHighlightHitCell()
     {
         SetMaterialProperty("_Highlighted", 0.0f);
         IsHighlightLocked = false;

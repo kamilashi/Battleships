@@ -98,8 +98,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   meshRenderer: {fileID: 4403272125962963993}
-  temporaryHighlightColor: {r: 1, g: 1, b: 1, a: 0}
-  permanentHighlightColor: {r: 1, g: 0, b: 0, a: 0}
+  mainColor: {r: 1, g: 1, b: 1, a: 0}
+  hitColor: {r: 1, g: 0, b: 0, a: 0}
   cellData:
     index: {x: 0, y: 0}
   battleFieldView: {fileID: 0}

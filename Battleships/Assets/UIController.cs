@@ -65,7 +65,17 @@ public class UIController : MonoBehaviour
     {
         List<StaticShipData> shipDatas = localPlayerState.GetShipDataList();
 
-        for( int i = 0; i < (int) ShipType.Count; i++)
+        if (shipButtons.Count != 0)
+        {
+            foreach(UIShipButton btn in shipButtons)
+            {
+                Destroy(btn.gameObject);
+            }
+
+            shipButtons.Clear();
+        }
+
+        for ( int i = 0; i < (int) ShipType.Count; i++)
         {
             GameObject cellGameObject = GameObject.Instantiate(shipButtonPrefab, shipButtonParent);
             UIShipButton buttonObj = cellGameObject.GetComponent<UIShipButton>();
@@ -93,6 +103,11 @@ public class UIController : MonoBehaviour
     public void OnSubmitButtonClicked()
     {
         localPlayerState.OnSubmitSignalReceived();
+    }
+    private void OnRestartRequested()
+    {
+        localPlayerState.CmdRequestRestart();
+        OnGamePhaseChanged(GamePhase.Wait, GamePhase.Wait);
     }
 
     public void OnGamePhaseChanged(GamePhase oldPhase, GamePhase newPhase)
@@ -167,10 +182,6 @@ public class UIController : MonoBehaviour
 
         messageText.text = message;
         messageLogCoroutine = StartCoroutine(LogMessageCoroutine());
-    }
-    private void OnRestartRequested()
-    {
-        localPlayerState.CmdRequestRestart();
     }
 
     private IEnumerator LogMessageCoroutine()

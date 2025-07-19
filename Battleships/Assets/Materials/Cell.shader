@@ -3,7 +3,7 @@ Shader "Unlit/Cell"
     Properties
     {
         _MainTex ("Texture", 2D) = "white" {}
-        _Color ("Color", Color) = (1,1,1,1)
+        _MainColor ("Color", Color) = (1,1,1,1)
         _Radius("Radius", Range(0, 1)) = 0.5
         _Transparency("Transparency", Range(0, 2)) = 0.5
         _ScrollSpeed ("Scroll Speed", Vector) = (0.1, 0.1, 0, 0)
@@ -50,7 +50,7 @@ Shader "Unlit/Cell"
             float _Transparency;
             float _Highlighted;
             float _NoiseScale;
-            float4 _Color;
+            float4 _MainColor;
             float4 _HighlightColor;
 
             Vector _ScrollSpeed;
@@ -75,6 +75,7 @@ Shader "Unlit/Cell"
 
                 float alpha = 0.2f;
                 float4 color = _HighlightColor;
+                //alpha *= _HighlightColor.w;
 
                 if(_Highlighted < 0.5f)
                 {
@@ -84,7 +85,7 @@ Shader "Unlit/Cell"
                     float noiseAlpha = noise(shiftedUV, _NoiseScale);
 
                     alpha *= noiseAlpha;
-                    color = _Color;
+                    color = _MainColor;
                 }
 
                 return fixed4(color.xyz, alpha);

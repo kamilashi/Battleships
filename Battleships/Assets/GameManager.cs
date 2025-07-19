@@ -162,6 +162,7 @@ public class GameManager : NetworkBehaviour
 
     private void ResetGameManager()
     {
+        currentGamePhase = GamePhase.Wait;
         players.Clear();
         currentTurnCount = 0;
     }
@@ -172,12 +173,13 @@ public class GameManager : NetworkBehaviour
 
     private void SwitchToBuildPhase()
     {
+        GamePhase previousGamePhase = currentGamePhase;
         currentGamePhase = GamePhase.Build;
         foreach (PlayerState playerState in players)
         {
             playerState.syncedState.gamePhase = currentGamePhase;
             playerState.RpcSyncGameStateWClient(playerState.connectionToClient, playerState.syncedState);
-            playerState.RpcOnGamePhaseChanged(playerState.connectionToClient, GamePhase.Wait, currentGamePhase);
+            playerState.RpcOnGamePhaseChanged(playerState.connectionToClient, previousGamePhase, currentGamePhase);
         }
     }
 
@@ -227,7 +229,7 @@ public class GameManager : NetworkBehaviour
 
             targetGameState.battleField.ClearCell(x, y);
 
-            CellHitData otherHitData = new CellHitData(HitResult.Damaged, shipIndex, x, y, true);
+            CellHitData otherHitData = new CellHitData(hitResult, shipIndex, x, y, true);
             targetPlayer.RpcOnCellHit(targetPlayer.connectionToClient, otherHitData);
         }
         else

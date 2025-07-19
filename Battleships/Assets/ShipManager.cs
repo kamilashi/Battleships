@@ -93,6 +93,10 @@ public class RuntimeShipData : ShipData
         origin.y = origin[1];
         return origin;
     }
+    public Vector2Int GetOrientation()
+    {
+        return ShipData.GetOrientation(orientation);
+    }
 }
 
 public class StaticShipData : ShipData
