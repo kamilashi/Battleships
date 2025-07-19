@@ -10,7 +10,7 @@ Shader "Unlit/Cell"
         _NoiseScale("NoiseScale", Range(0, 10)) = 0.5
 
         _Highlighted("Highlighted", Range(0, 1)) = 0.0
-        _HighlightedColor ("Color", Color) = (1,1,1,1)
+        _HighlightColor ("Color", Color) = (1,1,1,1)
     }
 
     SubShader
@@ -51,7 +51,7 @@ Shader "Unlit/Cell"
             float _Highlighted;
             float _NoiseScale;
             float4 _Color;
-            float4 _HighlightedColor;
+            float4 _HighlightColor;
 
             Vector _ScrollSpeed;
 
@@ -74,7 +74,7 @@ Shader "Unlit/Cell"
                 float distance = UVtoRadius(i.uv, _Transparency);
 
                 float alpha = 0.2f;
-                float4 color = _HighlightedColor;
+                float4 color = _HighlightColor;
 
                 if(_Highlighted < 0.5f)
                 {

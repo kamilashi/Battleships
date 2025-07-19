@@ -41,6 +41,7 @@ public class PlayerState : NetworkBehaviour
     public static UnityEvent<PlayerState, int> onShipDestroyed = new UnityEvent<PlayerState, int>();
     public static UnityEvent<Orientation, Orientation> onOrientationToggled = new UnityEvent<Orientation, Orientation>();
     public static UnityEvent<GamePhase, GamePhase> onGamePhaseChanged = new UnityEvent<GamePhase, GamePhase>();
+    public static UnityEvent<int, int> onHitStored = new UnityEvent<int, int>();
     public static UnityEvent<string> onMessageLogged = new UnityEvent<string>();
 
     private LocalGameState localGameState;
@@ -162,6 +163,8 @@ public class PlayerState : NetworkBehaviour
         {
             syncedState.hitCoords[0] = x;
             syncedState.hitCoords[1] = y;
+
+            onHitStored?.Invoke(x, y);
         }
         else
         {

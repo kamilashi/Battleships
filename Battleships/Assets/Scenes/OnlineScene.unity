@@ -1213,7 +1213,7 @@ MonoBehaviour:
   players: []
   currentGamePhase: 0
   currentTurnCount: 0
-  startIntoBuild: 1
+  startIntoBuild: 0
 --- !u!114 &848502403
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1846,11 +1846,12 @@ MonoBehaviour:
     type: 3}
   missedCellMarkerPrefab: {fileID: 5780526340500760578, guid: 9ea823812c5ba3340bc650841e310616,
     type: 3}
-  shipFieldTranslateSpeed: 0.5
+  shipFieldTranslateSpeed: 1
   shipFieldTranslateDistance: 0.51
   localPlayerState: {fileID: 0}
   cellObjects: []
   shipObjects: []
+  highlightedHitCell: -1
   hoveredObject: {fileID: 0}
   isDebugRenderEnabled: 1
   testCoords: {x: 0, y: 0}

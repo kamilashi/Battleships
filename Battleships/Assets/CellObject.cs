@@ -21,16 +21,21 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
 {
     [Header("Setup in Prefab")]
     public MeshRenderer meshRenderer;
+    public Color temporaryHighlightColor;
+    public Color permanentHighlightColor;
 
     [Header("Auto Setup")]
     public CellData cellData;
     public BattleFieldView battleFieldView;
 
+    [Header("Debug View")]
+    public bool IsHighlightLocked;
     private MaterialPropertyBlock mpb;
 
     public void Awake()
     {
         mpb = new MaterialPropertyBlock();
+        IsHighlightLocked = false;
     }
     public void OnClicked()
     {
@@ -39,18 +44,44 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
 
     public void OnStartHover()
     {
-        SetMaterialProperty("_Highlighted", 1.0f);
+        if(!IsHighlightLocked)
+        {
+            SetMaterialProperty("_HighlightColor", temporaryHighlightColor);
+            SetMaterialProperty("_Highlighted", 1.0f);
+        }
     }
 
     public void OnStopHover()
     {
-        SetMaterialProperty("_Highlighted", 0.0f);
+        if (!IsHighlightLocked)
+        {
+            SetMaterialProperty("_Highlighted", 0.0f);
+        }
     }
 
-    public void SetMaterialProperty(string propertyName, float value)
+    public void OnHighlightPermanent()
+    {
+        SetMaterialProperty("_HighlightColor", permanentHighlightColor);
+        SetMaterialProperty("_Highlighted", 1.0f);
+        IsHighlightLocked = true;
+    }
+
+    public void OnStopHighlightPermanent()
+    {
+        SetMaterialProperty("_Highlighted", 0.0f);
+        IsHighlightLocked = false;
+    }
+
+    private void SetMaterialProperty(string propertyName, float value)
     {
         meshRenderer.GetPropertyBlock(mpb); 
         mpb.SetFloat(propertyName, value);
+        meshRenderer.SetPropertyBlock(mpb);
+    }
+    private void SetMaterialProperty(string propertyName, Color color)
+    {
+        meshRenderer.GetPropertyBlock(mpb); 
+        mpb.SetColor(propertyName, color);
         meshRenderer.SetPropertyBlock(mpb);
     }
     public void SpawnChild(GameObject child, Vector3 localPosition)

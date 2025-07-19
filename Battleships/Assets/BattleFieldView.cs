@@ -5,6 +5,7 @@ using System.Collections.Generic;
 using System.Runtime.CompilerServices;
 using UnityEngine;
 using UnityEngine.Assertions;
+using UnityEngine.UIElements;
 
 public interface IVisualSpawner
 {
@@ -63,6 +64,7 @@ public class BattleFieldView : MonoBehaviour
 
     public List<CellObject> cellObjects;
     public List<ShipObject> shipObjects;
+    public int highlightedHitCell = -1;
     public CellObject hoveredObject;
     public bool isDebugRenderEnabled = false;
 
@@ -75,9 +77,11 @@ public class BattleFieldView : MonoBehaviour
     {
         PlayerState.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
         PlayerState.onTurnFinished.AddListener(ProcessCellHits);
+        PlayerState.onTurnFinished.AddListener(RemoveCurrentHitCellHighlight);
         PlayerState.onShipAdded.AddListener(OnShipAdded);
         PlayerState.onShipDestroyed.AddListener(OnShipDestroyed);
         PlayerState.onGamePhaseChanged.AddListener(OnGamePhaseChanged);
+        PlayerState.onHitStored.AddListener(OnHitCellStored);
     }
 
     public void OnLocalPlayerInitialized(PlayerState localPlayer)
@@ -172,6 +176,25 @@ public class BattleFieldView : MonoBehaviour
     {
         VisualizeOpponentCellInfo(hitData.hitCellCoords[0], hitData.hitCellCoords[1], missedCellMarkerPrefab);
     }
+    private void OnHitCellStored(int x, int y)
+    {
+        RemoveCurrentHitCellHighlight();
+
+        LocalGameState localGameState = localPlayerState.GetLocalGameState();
+        int cellObjectIndex = localGameState.battleField.GetFlatCellIndex(x, y);
+        cellObjects[cellObjectIndex].OnHighlightPermanent();
+
+        highlightedHitCell = cellObjectIndex;
+    }
+
+    private void RemoveCurrentHitCellHighlight()
+    {
+        if (highlightedHitCell >= 0)
+        {
+            cellObjects[highlightedHitCell].OnStopHighlightPermanent();
+            highlightedHitCell = -1;
+        }
+    }
 
     private void OnShipAdded(PlayerState player, Vector2Int coords, RuntimeShipData shipInstanceData, Orientation orientation)
     {
@@ -243,7 +266,7 @@ public class BattleFieldView : MonoBehaviour
 
     private void OnGamePhaseChanged(GamePhase oldPhase, GamePhase newPhase)
     {
-        if (newPhase == GamePhase.Build)
+        if (newPhase == GamePhase.Combat)
         {
             StartCoroutine(ShiftDownShipField());
         }

@@ -85,9 +85,10 @@ public class GameManager : NetworkBehaviour
             return;
         }
 
-        if (currentGamePhase == GamePhase.Wait)
+        if (currentGamePhase == GamePhase.Wait || startIntoBuild)
         {
             SwitchToBuildPhase();
+            startIntoBuild = false;
         }
 
         if (players[0].syncedState.submitSignalReceived && players[1].syncedState.submitSignalReceived) 
