@@ -55,7 +55,7 @@ public struct PlayerCommand
 public class GameManager : NetworkBehaviour
 {
     [Header("Manual Setup")]
-    public const int intendedPlayerCount = 2;
+    public static int intendedPlayerCount = 2;
 
     [Header("Debug View")]
 

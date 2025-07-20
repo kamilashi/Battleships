@@ -8,7 +8,13 @@ public class MainMenuUI : MonoBehaviour
     private enum MainMenuPage
     {
         GameModeSelect,
+        LocalNetworkDataInput,
         Connection
+    }
+    private enum InputType
+    {
+        IPAddress,
+        Port
     }
 
     [Header("Setup")]
@@ -16,21 +22,24 @@ public class MainMenuUI : MonoBehaviour
     public TMPro.TMP_Text mainMenuTitleText;
     public TMPro.TMP_Text mainMenuStatusInfoText;
     public GameObject menuButtonPrefab;
+    public GameObject labeledInputPrefab;
     public Button backButton;
 
     [Header("DebugView")]
     private List<MainMenuPage> pageHistory = new List<MainMenuPage>();
     private List<UIBasicButton> menuButtons = new List<UIBasicButton>();
+    private Dictionary<InputType, UILabeledInput> labeledInputs = new Dictionary<InputType, UILabeledInput>();
 
     void Awake()
     {
         backButton.onClick.AddListener(OnBackButtonClicked);
         NetworkController.onStatusInfoLogged.AddListener(UpdateStatusInfo);
+        NetworkController.onProceedToConnectionMenu.AddListener(LoadConnectionMenu);
 
         LoadMenuPage(MainMenuPage.GameModeSelect);
     }
 
-    void ClearMenuEntries()
+    void ClearMenuButtons()
     {
         foreach(UIBasicButton btn in menuButtons)
         {
@@ -39,14 +48,32 @@ public class MainMenuUI : MonoBehaviour
 
         menuButtons.Clear();    
     }
+    void ClearLabeledInputs()
+    {
+        foreach (InputType type in labeledInputs.Keys)
+        {
+            Destroy(labeledInputs[type].gameObject);
+        }
+
+        labeledInputs.Clear();
+    }
 
     UIBasicButton CreateButton()
     {
-        GameObject buttonGameObject = GameObject.Instantiate(menuButtonPrefab, menuEntriesParent); //#TODO: replace with pooling
+        GameObject buttonGameObject = Instantiate(menuButtonPrefab, menuEntriesParent); //#TODO: replace with pooling
         UIBasicButton button = buttonGameObject.GetComponent<UIBasicButton>();
         menuButtons.Add(button);
 
         return button;
+    }
+
+    UILabeledInput CreateLabeledInput(InputType type)
+    {
+        GameObject labelInputGameObject = Instantiate(labeledInputPrefab, menuEntriesParent); //#TODO: replace with pooling
+        UILabeledInput labeledInput = labelInputGameObject.GetComponent<UILabeledInput>();
+        labeledInputs.Add(type, labeledInput);
+
+        return labeledInput;
     }
 
     void CreateGameModeMenu()
@@ -69,20 +96,42 @@ public class MainMenuUI : MonoBehaviour
         UIBasicButton startClientButton = CreateButton();
         startClientButton.button.onClick.AddListener(OnStartClientSelected);
         startClientButton.buttonNameText.text = "Connect As Client";
+    }
 
+    void CreateLocalMultiplayerMenu()
+    {
+        UILabeledInput ipadress = CreateLabeledInput(InputType.IPAddress);
+        ipadress.labelText.text = "IPv4:";
+        ipadress.InputField.text = "192.168.0.5";
+
+        UILabeledInput port = CreateLabeledInput(InputType.Port);
+        port.labelText.text = "Port:";
+        port.InputField.text = "7777";
+
+        UIBasicButton submit = CreateButton();
+        submit.button.onClick.AddListener(OnLocalMultiplayerDataSubmitted);
+        submit.buttonNameText.text = "Submit";
     }
 
     void LoadMenuPage(MainMenuPage page)
     {
         if (menuButtons.Count != 0)
         {
-            ClearMenuEntries();
+            ClearMenuButtons();
+        }
+
+        if (labeledInputs.Count != 0)
+        {
+            ClearLabeledInputs();
         }
 
         switch (page)
         {
             case MainMenuPage.GameModeSelect:
                 CreateGameModeMenu();
+                break;
+            case MainMenuPage.LocalNetworkDataInput:
+                CreateLocalMultiplayerMenu();
                 break;
             case MainMenuPage.Connection:
                 CreateConnectionMenu();
@@ -94,12 +143,6 @@ public class MainMenuUI : MonoBehaviour
             pageHistory.Add(page);
         }
     }
-/*
-    void LoadConnectionMenu()
-    {
-        LoadMenuPage(MainMenuPage.Connection);
-        NetworkController.onNetworkmanagerReady.RemoveListener(LoadConnectionMenu);
-    }*/
 
     private void UpdateStatusInfo(string info)
     {
@@ -108,18 +151,13 @@ public class MainMenuUI : MonoBehaviour
 
     void OnLocalMultiplayerSelected()
     {
-        NetworkController.onTransportSelected?.Invoke(MultiplayerMode.Local);
-        LoadMenuPage(MainMenuPage.Connection);
-
-        //NetworkController.onNetworkmanagerReady.AddListener(LoadConnectionMenu);
+        LoadMenuPage(MainMenuPage.LocalNetworkDataInput);
     }
 
     void OnRemoteMultiplayerSelected()
     {
         NetworkController.onTransportSelected?.Invoke(MultiplayerMode.Remote);
-        LoadMenuPage(MainMenuPage.Connection);
-
-        //NetworkController.onNetworkmanagerReady.AddListener(LoadConnectionMenu);
+        //LoadMenuPage(MainMenuPage.Connection);
     }
 
     void OnStartHostSelected()
@@ -130,6 +168,18 @@ public class MainMenuUI : MonoBehaviour
     void OnStartClientSelected()
     {
         NetworkController.onStartClientSelected?.Invoke();
+    }
+
+    void OnLocalMultiplayerDataSubmitted()
+    {
+        string ipAddress = labeledInputs[InputType.IPAddress].InputField.text;
+        string portNumber = labeledInputs[InputType.Port].InputField.text;
+        NetworkController.OnLocalMultiplayerDataSubmitted?.Invoke(ipAddress, portNumber);
+    }
+
+    void LoadConnectionMenu()
+    {
+        LoadMenuPage(MainMenuPage.Connection);
     }
 
     void OnBackButtonClicked()
