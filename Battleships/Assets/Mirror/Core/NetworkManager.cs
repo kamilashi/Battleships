@@ -204,7 +204,7 @@ namespace Mirror
         }
 
         // virtual so that inheriting classes' Awake() can call base.Awake() too
-        public virtual void Awake()
+        public virtual void Initialize()
         {
             // Don't allow collision-destroyed second instance to continue.
             if (!InitializeSingleton()) return;

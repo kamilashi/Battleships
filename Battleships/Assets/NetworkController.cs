@@ -76,7 +76,9 @@ public class NetworkController : MonoBehaviour
     {
         requestedMode = transport;
 
-        if(requestedMode == MultiplayerMode.Local)
+        AssingTransport();
+
+        if (requestedMode == MultiplayerMode.Local)
         {
             DisableSteamworks();
             return;
@@ -97,9 +99,9 @@ public class NetworkController : MonoBehaviour
 
     private void OnHostStartRequested()
     {
-        AssingTransport();
+        //AssingTransport();
 
-        if(assignedMode == MultiplayerMode.Remote)
+        if (assignedMode == MultiplayerMode.Remote)
         {
             if (isRemoteReady)
             {
@@ -118,9 +120,9 @@ public class NetworkController : MonoBehaviour
 
     private void OnClientStartRequested()
     {
-        AssingTransport();
+        //AssingTransport();
 
-        if(assignedMode == MultiplayerMode.Remote)
+        if (assignedMode == MultiplayerMode.Remote)
         {
             LogStatusInfo("Please join via a Steam invite!");
         }
@@ -129,6 +131,7 @@ public class NetworkController : MonoBehaviour
             networkManager.StartClient();
         }
     }
+
     private void OnLocalMultiplayerDataReceived(string ipAddress, string portNumber)
     {
         string logString = "";
@@ -180,14 +183,20 @@ public class NetworkController : MonoBehaviour
                 remoteCallbacksInitialized = true;
             }
 
-            networkManager.transport = steamTransport;
             kcpTransport.enabled = false;
+            steamTransport.enabled = true;
+
+            networkManager.transport = steamTransport;
+            networkManager.Initialize();
         }
         else // if(selectedTransport == MultiplayerMode.Local )
         {
             kcpTransport.enabled = true;
+            steamTransport.enabled = false;
+
             networkManager.transport = kcpTransport;
         }
+
 
         assignedMode = requestedMode;
     }
@@ -196,6 +205,7 @@ public class NetworkController : MonoBehaviour
     {
         if(isRemoteReady)
         {
+            onProceedToConnectionMenu?.Invoke();
             return;
         }
 
@@ -204,7 +214,7 @@ public class NetworkController : MonoBehaviour
             steamManager = gameObject.AddComponent<SteamManager>();
         }
 
-        networkManager.transport.enabled = true;
+        steamTransport.enabled = true;
         isRemoteReady = true;
         LogStatusInfo("Steam is initialized and ready!");
 
@@ -240,6 +250,7 @@ public class NetworkController : MonoBehaviour
 
     public void HostRemoteLobby()
     {
+
         SteamMatchmaking.CreateLobby(ELobbyType.k_ELobbyTypeFriendsOnly, GameManager.intendedPlayerCount);
     }
 
