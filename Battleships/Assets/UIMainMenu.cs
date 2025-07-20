@@ -101,8 +101,8 @@ public class MainMenuUI : MonoBehaviour
     void CreateLocalMultiplayerMenu()
     {
         UILabeledInput ipadress = CreateLabeledInput(InputType.IPAddress);
-        ipadress.labelText.text = "IPv4:";
-        ipadress.InputField.text = "192.168.0.5";
+        ipadress.labelText.text = "Host IPv4:";
+        ipadress.InputField.text = "192.168.0.X";
 
         UILabeledInput port = CreateLabeledInput(InputType.Port);
         port.labelText.text = "Port:";

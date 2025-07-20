@@ -58,7 +58,7 @@ public class NetworkController : MonoBehaviour
         onStartClientSelected.AddListener(OnClientStartRequested);
         OnLocalMultiplayerDataSubmitted.AddListener(OnLocalMultiplayerDataReceived);
 
-        requestedMode = MultiplayerMode.None;
+        assignedMode = MultiplayerMode.None;
 
         kcpTransport.enabled = false;
         steamTransport.enabled = false;
@@ -141,7 +141,7 @@ public class NetworkController : MonoBehaviour
         else
         {
             parsedSuccessfully = false;
-            logString += "Invalid network address. You can check yours by running ipconfig in the command line. \n";
+            logString += "Invalid network address. The host can check theirs by running ipconfig in the command line. \n";
         }
 
         if (ushort.TryParse(portNumber, out ushort portResult))
