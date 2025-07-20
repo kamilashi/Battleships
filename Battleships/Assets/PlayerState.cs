@@ -43,6 +43,7 @@ public class PlayerState : NetworkBehaviour
     public static UnityEvent<GamePhase, GamePhase> onGamePhaseChanged = new UnityEvent<GamePhase, GamePhase>();
     public static UnityEvent<int, int> onHitStored = new UnityEvent<int, int>();
     public static UnityEvent<string> onMessageLogged = new UnityEvent<string>();
+    public static UnityEvent onSubmitAccepted = new UnityEvent();
 
     private LocalGameState localGameState;
 
@@ -91,7 +92,6 @@ public class PlayerState : NetworkBehaviour
         Orientation selectedOrientation = selectedShipOrientation;
         if (type == ShipType.Count)
         {
-            //Debug.Log("Choose a ship to place first.");
             onMessageLogged?.Invoke("Choose a ship to place first");
             return;
         }
@@ -99,7 +99,6 @@ public class PlayerState : NetworkBehaviour
         StaticShipData shipData = localGameState.shipManager.GetShipData(type);
         if (!localGameState.battleField.CanPlaceShip(x, y, shipData, selectedOrientation))
         {
-            //Debug.Log("Cannot place ship here.");
             onMessageLogged?.Invoke("Cannot place ship here");
             return;
         }
@@ -135,11 +134,11 @@ public class PlayerState : NetworkBehaviour
         {
             case GamePhase.Build:
                 {
-                    /*if (gameState.shipManager.HasAvailableShipsRemaining())
+                    if (localGameState.shipManager.HasAvailableShipsRemaining())
                     {
                         Debug.Log("You need to place all ships to progress!");
                         return;
-                    }*/
+                    }
                     break;
                 }
             case GamePhase.Combat:
@@ -159,6 +158,7 @@ public class PlayerState : NetworkBehaviour
         }
 
         syncedState.submitSignalReceived = true;
+        onSubmitAccepted?.Invoke();
         SerializeGameState();
         CmdSyncGameStateWServer(this.syncedState);
     }

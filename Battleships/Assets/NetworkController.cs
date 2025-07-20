@@ -80,7 +80,7 @@ public class NetworkController : MonoBehaviour
 
         if (requestedMode == MultiplayerMode.Local)
         {
-            DisableSteamworks();
+            DisableSteamworks(false);
             return;
         }
 
@@ -157,11 +157,14 @@ public class NetworkController : MonoBehaviour
             logString += "Invalid port number. Please enter a number between 0 and 65535. \n";
         }
 
-        LogStatusInfo(logString);
 
         if (parsedSuccessfully)
         {
             onProceedToConnectionMenu?.Invoke();
+        }
+        else
+        {
+            LogStatusInfo(logString);
         }
     }
 
@@ -169,6 +172,7 @@ public class NetworkController : MonoBehaviour
     {
         if(requestedMode == assignedMode)
         {
+            Debug.Log("Trying to reassign the same transport: " + requestedMode.ToString());
             return;
         }
 
@@ -187,7 +191,6 @@ public class NetworkController : MonoBehaviour
             steamTransport.enabled = true;
 
             networkManager.transport = steamTransport;
-            networkManager.Initialize();
         }
         else // if(selectedTransport == MultiplayerMode.Local )
         {
@@ -197,7 +200,8 @@ public class NetworkController : MonoBehaviour
             networkManager.transport = kcpTransport;
         }
 
-
+        networkManager.Initialize();
+        LogStatusInfo("Initialized via transport " + Transport.active);
         assignedMode = requestedMode;
     }
 
@@ -216,7 +220,7 @@ public class NetworkController : MonoBehaviour
 
         steamTransport.enabled = true;
         isRemoteReady = true;
-        LogStatusInfo("Steam is initialized and ready!");
+        LogStatusInfo("Initialized via transport " + Transport.active + "\nSteam is initialized and ready!");
 
         onProceedToConnectionMenu?.Invoke();
     }
@@ -226,7 +230,7 @@ public class NetworkController : MonoBehaviour
         DisableSteamworks();
     }
 
-    private void DisableSteamworks()
+    private void DisableSteamworks(bool updateLog = true)
     {
         SteamAPI.Shutdown();
         Debug.Log("Called SteamAPI shutdown");
@@ -245,7 +249,11 @@ public class NetworkController : MonoBehaviour
         steamTransport.enabled = false;
 
         isRemoteReady = false;
-        LogStatusInfo("Steam connection has been disabled.");
+
+        if(updateLog)
+        {
+            LogStatusInfo("Steam connection has been disabled.");
+        }
     }
 
     public void HostRemoteLobby()

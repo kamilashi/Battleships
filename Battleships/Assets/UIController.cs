@@ -9,6 +9,8 @@ public class UIController : MonoBehaviour
     [Header("Setup - Gameplay")]
 
     public Canvas gamePlayCanvas;
+    public GameObject leftGameplayUIParent;
+    public GameObject rightGameplayUIParent;
     public GameObject shipButtonPrefab;
     public RectTransform shipButtonParent;
     public Button submitButton;
@@ -44,6 +46,8 @@ public class UIController : MonoBehaviour
         PlayerState.onLocalPlayerInitializedEvent.AddListener(OnLocalPlayerInitialized);
         PlayerState.onMessageLogged.AddListener(OnLogMessage);
         PlayerState.onGamePhaseChanged.AddListener(OnGamePhaseChanged);
+        PlayerState.onSubmitAccepted.AddListener(HideGameplayUI);
+        PlayerState.onTurnFinished.AddListener(ShowGameplayUI);
         submitButton.onClick.AddListener(OnSubmitButtonClicked);
         restartButton.onClick.AddListener(OnRestartRequested);
         messagePanelMaxHeight = messageContainerTransform.rect.height;
@@ -109,7 +113,6 @@ public class UIController : MonoBehaviour
         localPlayerState.CmdRequestRestart();
         OnGamePhaseChanged(GamePhase.Wait, GamePhase.Wait);
     }
-
     public void OnGamePhaseChanged(GamePhase oldPhase, GamePhase newPhase)
     {
         switch(newPhase)
@@ -218,5 +221,16 @@ public class UIController : MonoBehaviour
     {
         ScaleMessageY(0.0f);
         messageText.enabled = false;
+    }
+
+    private void HideGameplayUI()
+    {
+        leftGameplayUIParent.SetActive(false);
+        rightGameplayUIParent.SetActive(false);
+    }
+    private void ShowGameplayUI()
+    {
+        leftGameplayUIParent.SetActive(true);
+        rightGameplayUIParent.SetActive(true);
     }
 }

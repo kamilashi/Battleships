@@ -151,6 +151,7 @@ public class MainMenuUI : MonoBehaviour
 
     void OnLocalMultiplayerSelected()
     {
+        NetworkController.onTransportSelected?.Invoke(MultiplayerMode.Local);
         LoadMenuPage(MainMenuPage.LocalNetworkDataInput);
     }
 
