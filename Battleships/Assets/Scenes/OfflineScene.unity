@@ -1402,7 +1402,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   dontDestroyOnLoad: 1
-  runInBackground: 1
+  runInBackground: 0
   headlessStartMode: 0
   editorAutoStart: 0
   sendRate: 60

@@ -191,6 +191,7 @@ public class NetworkController : MonoBehaviour
             steamTransport.enabled = true;
 
             networkManager.transport = steamTransport;
+            Debug.Log("Assigned Steam transport ");
         }
         else // if(selectedTransport == MultiplayerMode.Local )
         {
@@ -198,9 +199,12 @@ public class NetworkController : MonoBehaviour
             steamTransport.enabled = false;
 
             networkManager.transport = kcpTransport;
+            Debug.Log("Assigned KCP transport ");
         }
 
+        Transport.active = networkManager.transport;
         networkManager.Initialize();
+
         LogStatusInfo("Initialized via transport " + Transport.active);
         assignedMode = requestedMode;
     }
