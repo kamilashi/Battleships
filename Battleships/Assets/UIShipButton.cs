@@ -4,11 +4,9 @@ using UnityEngine;
 using TMPro;
 using UnityEngine.UI;
 
-public class UIShipButton : MonoBehaviour
+public class UIShipButton : UIBasicButton
 {
     [Header("Setup in Prefab")]
-    public Button button;
-    public TMP_Text buttonNameText;
     public TMP_Text shipCountText;
 
 
