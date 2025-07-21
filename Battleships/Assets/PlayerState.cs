@@ -305,8 +305,7 @@ public class PlayerState : NetworkBehaviour
 
             if (!extCell.IsFree())
             {
-                cell.shipData = new RuntimeShipData();
-                cell.shipData.Initialize(extCell.shipData);
+                cell.shipInstanceIdx = extCell.shipInstanceIdx;
             }
 
             syncedState.field[i] = cell;
@@ -351,8 +350,7 @@ public class PlayerState : NetworkBehaviour
 
             if (!extCell.IsFree())
             {
-                cell.shipData = new RuntimeShipData();
-                cell.shipData.Initialize(extCell.shipData);
+                cell.shipInstanceIdx = extCell.shipInstanceIdx;
             }
 
             localGameState.battleField.field[i] = cell;

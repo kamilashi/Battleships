@@ -194,7 +194,7 @@ public class GameManager : NetworkBehaviour
         BattleCell attackedCell = targetGameState.battleField.GetCell( x, y);
         if (!attackedCell.IsFree())
         {
-            shipIndex = attackedCell.shipData.instanceId;
+            shipIndex = attackedCell.shipInstanceIdx;
             hitResult = targetGameState.shipManager.HitShip(shipIndex);
 
             if (hitResult == HitResult.Undefined)
@@ -207,7 +207,7 @@ public class GameManager : NetworkBehaviour
                 targetPlayer.RpcOnShipDestroyed(targetPlayer.connectionToClient, shipIndex);
                 Debug.Log("Killed ship");
 
-                RuntimeShipData hitShip = attackedCell.shipData;
+                RuntimeShipData hitShip = attackerGameState.shipManager.shipInstances[attackedCell.shipInstanceIdx];
 
                 List<Vector2Int> surroundingCells = attackerGameState.battleField.GetBlindAdjacentPathInRange(hitShip.origin[0], hitShip.origin[1], hitShip.Size(), ShipData.GetOrientation(hitShip.orientation));
 

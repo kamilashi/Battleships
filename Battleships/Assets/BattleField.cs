@@ -11,7 +11,7 @@ using static UnityEngine.UI.Image;
 public class BattleCell
 {
     public float[] bottomLeftOrigin;
-    public RuntimeShipData shipData; //#TODO: replace with ship instance ID!
+    public int shipInstanceIdx; //#TODO: replace with ship instance ID!
     public bool wasHitOnce;
     public void Initialize(Vector3 origin)
     {
@@ -38,15 +38,15 @@ public class BattleCell
 
     public bool IsFree()
     {
-        return shipData == null;
+        return shipInstanceIdx < 0;
     }
     public void ConnectShip(RuntimeShipData shipData)
     {
-        this.shipData = shipData;
+        this.shipInstanceIdx = shipData.instanceId;
     }
     public void Reset()
     {
-        shipData = null;
+        shipInstanceIdx = -1;
     }
 
     public Vector3 getBottomLeftOrigin()
