@@ -68,6 +68,7 @@ public class CellObject : MonoBehaviour, IHoverable, IClickable, IVisualSpawner
     public void HighlightExposedCell()
     {
         SetMaterialProperty("_MainColor", hitColor);
+        SetMaterialProperty("_Transparency", 0.65f);
     }
 
     public void StopHighlightHitCell()

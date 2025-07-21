@@ -10,7 +10,7 @@ Shader "Unlit/Cell"
         _NoiseScale("NoiseScale", Range(0, 10)) = 0.5
 
         _Highlighted("Highlighted", Range(0, 1)) = 0.0
-        _HighlightColor ("Color", Color) = (1,1,1,1)
+        _HighlightColor ("Highlight Color", Color) = (1,1,1,1)
     }
 
     SubShader

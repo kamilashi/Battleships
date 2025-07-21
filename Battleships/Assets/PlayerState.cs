@@ -86,6 +86,8 @@ public class PlayerState : NetworkBehaviour
         {
             hitQueue.Clear();
         }
+
+        ClearHitInput();
     }
     private void TryPlaceShip(int x, int y, ShipType type)
     {
@@ -93,6 +95,13 @@ public class PlayerState : NetworkBehaviour
         if (type == ShipType.Count)
         {
             onMessageLogged?.Invoke("Choose a ship to place first");
+            return;
+        }
+
+        if (localGameState.shipManager.availableShipCounts[(int) type] < 1)
+        {
+            Debug.Log("No available ships of type " + type.ToString());
+            PlayerState.onMessageLogged?.Invoke("Out of ships for the selected type!");
             return;
         }
 
@@ -136,7 +145,7 @@ public class PlayerState : NetworkBehaviour
                 {
                     if (localGameState.shipManager.HasAvailableShipsRemaining())
                     {
-                        Debug.Log("You need to place all ships to progress!");
+                        onMessageLogged?.Invoke("You need to place all ships to progress!");
                         return;
                     }
                     break;

@@ -172,13 +172,6 @@ public class ShipManager
     {
         int index = (int)type;
 
-        if(availableShipCounts[index] < 1)
-        {
-            Debug.Log("No available ships of type " + type.ToString());
-            PlayerState.onMessageLogged?.Invoke("Out of ships for the selected type!");
-            return null;
-        }
-
         availableShipCounts[index]--;
         currentShipCounts[index]++;
         totalShipCount++;
