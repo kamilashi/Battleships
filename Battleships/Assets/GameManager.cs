@@ -207,7 +207,7 @@ public class GameManager : NetworkBehaviour
                 targetPlayer.RpcOnShipDestroyed(targetPlayer.connectionToClient, shipIndex);
                 Debug.Log("Killed ship");
 
-                RuntimeShipData hitShip = attackerGameState.shipManager.shipInstances[attackedCell.shipInstanceIdx];
+                RuntimeShipData hitShip = targetGameState.shipManager.shipInstances[attackedCell.shipInstanceIdx];
 
                 List<Vector2Int> surroundingCells = attackerGameState.battleField.GetBlindAdjacentPathInRange(hitShip.origin[0], hitShip.origin[1], hitShip.Size(), ShipData.GetOrientation(hitShip.orientation));
 

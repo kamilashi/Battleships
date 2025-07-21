@@ -22,6 +22,7 @@ namespace Mirror
         [FormerlySerializedAs("m_DontDestroyOnLoad")]
         [Tooltip("Should the Network Manager object be persisted through scene changes?")]
         public bool dontDestroyOnLoad = true;
+        public bool lazyLoadEnabled;
 
         /// <summary>Multiplayer games should always run in the background so the network doesn't time out.</summary>
         [FormerlySerializedAs("m_RunInBackground")]
@@ -204,19 +205,30 @@ namespace Mirror
         }
 
         // virtual so that inheriting classes' Awake() can call base.Awake() too
+        protected virtual void Awake()
+        {
+            if(!lazyLoadEnabled)
+            {
+                // Don't allow collision-destroyed second instance to continue.
+                if (!InitializeSingleton()) return;
+
+                // Apply configuration in Awake once already
+                ApplyConfiguration();
+
+                // Set the networkSceneName to prevent a scene reload
+                // if client connection to server fails.
+                networkSceneName = offlineScene;
+
+                // setup OnSceneLoaded callback
+                SceneManager.sceneLoaded += OnSceneLoaded;
+            }
+        }
         public virtual void Initialize()
         {
-            // Don't allow collision-destroyed second instance to continue.
             if (!InitializeSingleton()) return;
 
-            // Apply configuration in Awake once already
             ApplyConfiguration();
-
-            // Set the networkSceneName to prevent a scene reload
-            // if client connection to server fails.
             networkSceneName = offlineScene;
-
-            // setup OnSceneLoaded callback
             SceneManager.sceneLoaded += OnSceneLoaded;
         }
 

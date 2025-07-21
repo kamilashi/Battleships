@@ -68,6 +68,8 @@ public class BattleFieldSetup
     public int vertiCellsCount = 10;
     public float cellSize = 1.0f;
 
+    public bool allowIncompleteSetup = false;
+
     public Transform originTransformBottomLeft;
 }
 

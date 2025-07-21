@@ -143,7 +143,7 @@ public class PlayerState : NetworkBehaviour
         {
             case GamePhase.Build:
                 {
-                    if (localGameState.shipManager.HasAvailableShipsRemaining())
+                    if (!localGameState.battleField.setup.allowIncompleteSetup && localGameState.shipManager.HasAvailableShipsRemaining())
                     {
                         onMessageLogged?.Invoke("You need to place all ships to progress!");
                         return;
@@ -302,11 +302,7 @@ public class PlayerState : NetworkBehaviour
             BattleCell cell = new BattleCell();
             cell.Initialize(extCell.getBottomLeftOriginRaw());
             cell.wasHitOnce = extCell.wasHitOnce;
-
-            if (!extCell.IsFree())
-            {
-                cell.shipInstanceIdx = extCell.shipInstanceIdx;
-            }
+            cell.shipInstanceIdx = extCell.shipInstanceIdx;
 
             syncedState.field[i] = cell;
         }
@@ -347,11 +343,7 @@ public class PlayerState : NetworkBehaviour
             BattleCell cell = new BattleCell();
             cell.Initialize(extCell.getBottomLeftOriginRaw());
             cell.wasHitOnce = extCell.wasHitOnce;
-
-            if (!extCell.IsFree())
-            {
-                cell.shipInstanceIdx = extCell.shipInstanceIdx;
-            }
+            cell.shipInstanceIdx = extCell.shipInstanceIdx;
 
             localGameState.battleField.field[i] = cell;
         }

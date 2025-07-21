@@ -111,6 +111,10 @@ public class MainMenuUI : MonoBehaviour
         UIBasicButton submit = CreateButton();
         submit.button.onClick.AddListener(OnLocalMultiplayerDataSubmitted);
         submit.buttonNameText.text = "Submit";
+
+        UIBasicButton localhost = CreateButton();
+        localhost.button.onClick.AddListener(OnConnectToLocalHostSelected);
+        localhost.buttonNameText.text = "Connect To Localhost";
     }
 
     void LoadMenuPage(MainMenuPage page)
@@ -176,6 +180,10 @@ public class MainMenuUI : MonoBehaviour
         string ipAddress = labeledInputs[InputType.IPAddress].InputField.text;
         string portNumber = labeledInputs[InputType.Port].InputField.text;
         NetworkController.OnLocalMultiplayerDataSubmitted?.Invoke(ipAddress, portNumber);
+    }
+    void OnConnectToLocalHostSelected()
+    {
+        NetworkController.onConnectToLocalhostSelected?.Invoke();
     }
 
     void LoadConnectionMenu()

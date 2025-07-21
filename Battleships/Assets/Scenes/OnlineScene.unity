@@ -2750,6 +2750,7 @@ MonoBehaviour:
     horizCellsCount: 10
     vertiCellsCount: 10
     cellSize: 1
+    allowIncompleteSetup: 0
     originTransformBottomLeft: {fileID: 1294106682}
   shipManagerSetup:
     singleUnitPrefab: {fileID: 155178196347339139, guid: 553baea6c87e2c045a9c84b5e7001ab7,

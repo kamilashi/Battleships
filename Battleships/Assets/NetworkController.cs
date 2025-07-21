@@ -22,6 +22,7 @@ public class NetworkController : MonoBehaviour
     public static UnityEvent onStartHostSelected = new UnityEvent();
     public static UnityEvent onStartClientSelected = new UnityEvent();
     public static UnityEvent onNetworkmanagerReady = new UnityEvent();
+    public static UnityEvent onConnectToLocalhostSelected = new UnityEvent();
     public static UnityEvent<string, string> OnLocalMultiplayerDataSubmitted = new UnityEvent<string, string>();
 
     public static UnityEvent<string> onStatusInfoLogged = new UnityEvent<string>();
@@ -56,6 +57,7 @@ public class NetworkController : MonoBehaviour
         onTransportSelected.AddListener(OnTransportSelected);
         onStartHostSelected.AddListener(OnHostStartRequested);
         onStartClientSelected.AddListener(OnClientStartRequested);
+        onConnectToLocalhostSelected.AddListener(OnConnectToLocalhost);
         OnLocalMultiplayerDataSubmitted.AddListener(OnLocalMultiplayerDataReceived);
 
         assignedMode = MultiplayerMode.None;
@@ -99,8 +101,6 @@ public class NetworkController : MonoBehaviour
 
     private void OnHostStartRequested()
     {
-        //AssingTransport();
-
         if (assignedMode == MultiplayerMode.Remote)
         {
             if (isRemoteReady)
@@ -120,8 +120,6 @@ public class NetworkController : MonoBehaviour
 
     private void OnClientStartRequested()
     {
-        //AssingTransport();
-
         if (assignedMode == MultiplayerMode.Remote)
         {
             LogStatusInfo("Please join via a Steam invite!");
@@ -130,6 +128,14 @@ public class NetworkController : MonoBehaviour
         {
             networkManager.StartClient();
         }
+    }
+
+    private void OnConnectToLocalhost()
+    {
+        networkManager.networkAddress = "127.0.0.1";
+        kcpTransport.port = 7777;
+        onProceedToConnectionMenu?.Invoke();
+        LogStatusInfo("Initialized via transport " + Transport.active);
     }
 
     private void OnLocalMultiplayerDataReceived(string ipAddress, string portNumber)
@@ -161,6 +167,7 @@ public class NetworkController : MonoBehaviour
         if (parsedSuccessfully)
         {
             onProceedToConnectionMenu?.Invoke();
+            LogStatusInfo("Initialized via transport " + Transport.active);
         }
         else
         {
